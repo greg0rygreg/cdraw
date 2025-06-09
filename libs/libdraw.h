@@ -1,11 +1,12 @@
 #ifndef LIBDRAW_H
 #define LIBDRAW_H
 #include <time.h>
+#include <stdbool.h>
 
 struct canvas {
   int height;
   int width;
-  int** pixels;
+  bool** pixels;
   char* author;
   time_t time;
 };
@@ -16,6 +17,6 @@ void setAuthor(struct canvas* c, char* a);
 void togglePixel(struct canvas* c, int x, int y);
 void invertPixels(struct canvas* c);
 void setTime(struct canvas* c, time_t t);
-int getPixel(struct canvas* c, int x, int y);
+bool getPixel(struct canvas* c, int x, int y);
 
 #endif // LIBDRAW_H

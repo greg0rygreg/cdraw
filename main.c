@@ -41,7 +41,7 @@ int main(int argc, str* argv) {
   optionsA[1] = strdup("invert every pixel");
 
   // i love making my own libs and using them to my advantage
-  Menu* menu = initMenu("Cdraw", "alpha4", options, optionsN, "exit");
+  Menu* menu = initMenu("Cdraw", "alpha5-rc1", options, optionsN, "exit");
   // manual memory management is very fun indeed
   //
   // (i hate it)
@@ -63,6 +63,7 @@ int main(int argc, str* argv) {
   int b = 0;
 
   // do you think it's a good idea to do this?
+  // i think it is
   Menu* menus[] = {menu, drawing};
   clear();
   while (!b) {
@@ -84,20 +85,21 @@ int main(int argc, str* argv) {
         scanf("%d", &h);
         clear();
         if (h * w == 0) { // simple
-          error("width/height can't be zero. period.");
+          error("width/height can't be zero");
           sep();
           break;
         }
         if (h <= 2) {
-          error("height can't be less than or equal to 2. period.");
+          error("height can't be less than or equal to 2");
           sep();
           break;
         }
         if ((h >= 15 || w >= 15) && !debug) {
-          error("pass the -d parameter when executing this program to bypass this check (canvas can't have height/width >= 15)");
+          error("canvases can't have height or width equal to or greater than 15 pixels (pass -d parameter to skip this check)");
           sep();
-          break;  
+          break;
         }
+        // i love making my own libs and using them to my advantage
         struct canvas* canvas = initCanvas(h, w);
         if (canvas == NULL) {
           error("failed to allocate canvas - breaking now");
@@ -125,9 +127,8 @@ int main(int argc, str* argv) {
               scanf("%d", &x);
               printf("Y coordinate (1-%d): ", h);
               scanf("%d", &y);
-              // i can do better than this i promise
-              if (x-1 <= w && y-1 <= h && y-1 >= 0 && x-1 >= 0)
-                togglePixel(canvas, x, y);
+              // i did better than that as i promised
+              togglePixel(canvas, x, y);
               clear();
               break;
             }

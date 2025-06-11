@@ -115,5 +115,9 @@ void inputErr(int *input) {
     error(_temp);
     free(_temp);
 }
+void ignorePrev() {
+  char c;
+  while ((c = getchar()) != '\n' && c != EOF);
+}
 
 // use make

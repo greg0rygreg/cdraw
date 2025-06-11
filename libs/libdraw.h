@@ -3,6 +3,10 @@
 #include <time.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct canvas {
   int height;
   int width;
@@ -18,5 +22,10 @@ void togglePixel(struct canvas* c, int x, int y);
 void invertPixels(struct canvas* c);
 void setTime(struct canvas* c, time_t t);
 bool getPixel(struct canvas* c, int x, int y);
+void setPixel(struct canvas* c, int x, int y, bool v);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // LIBDRAW_H

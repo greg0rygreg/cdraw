@@ -71,9 +71,8 @@ void setPixel(struct canvas* c, int x, int y, bool v) {
 void invertPixels(struct canvas* c) {
   if (c == NULL) return;
   for (int y = 0; y < c->height; y++) {
-    for (int x = 0; x < c->width; x++) {
+    for (int x = 0; x < c->width; x++)
       c->pixels[y][x] = !c->pixels[y][x];
-    }
   }
 }
 

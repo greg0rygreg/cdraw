@@ -23,7 +23,7 @@ int main(int argc, str* argv) {
       debug = 1;
   }
   int optionsN = 3;
-  int optionsAN = 2;
+  int optionsAN = 3;
   str* options = malloc(sizeof(str) * optionsN);
   if (!options) return 1;
   // i don't want to hear ANY of you say i need to handle errors in here too.
@@ -38,12 +38,12 @@ int main(int argc, str* argv) {
     return 1;
   }
   optionsA[0] = strdup("toggle pixel");
-  optionsA[1] = strdup("invert every pixel");
+  optionsA[1] = strdup("set pixel");
+  optionsA[2] = strdup("invert every pixel");
 
   // i love making my own libs and using them to my advantage
-  Menu* menu = initMenu("Cdraw", "alpha5-rc1", options, optionsN, "exit");
+  Menu* menu = initMenu("Cdraw", "alpha5", options, optionsN, "exit");
   // manual memory management is very fun indeed
-  //
   // (i hate it)
   if (!menu) {
     dptrfree((void**)options, optionsN);
@@ -54,7 +54,10 @@ int main(int argc, str* argv) {
   if (!drawing) {
     dptrfree((void**)options, optionsN);
     dptrfree((void**)optionsA, optionsAN);
-    free(menu);
+    // how did this go unnoticed for (around) 16 FUCKING COMMITS????
+    // for context, before it was deallocMenu(menu), it was free(menu),
+    // which is very fucking much memory unsafe
+    deallocMenu(menu);
     return 1;
   }
 
@@ -133,6 +136,23 @@ int main(int argc, str* argv) {
               break;
             }
             case 2: {
+              clear();
+              int x;
+              int y;
+              int v;
+              printf("X coordinate (1-%d): ", w);
+              scanf("%d", &x);
+              printf("Y coordinate (1-%d): ", h);
+              scanf("%d", &y);
+              printf("value (1 or 0): ");
+              scanf("%d", &v);
+              // it's to prevent bad shit from happening and...
+              // I'MMMMMMMM NOOOOOOOOOOOOOOOOT SOORRYYYYYYYYYYYYYYYYYY
+              setPixel(canvas, x, y, (v > 0 ? true : false)); 
+              clear();
+              break;
+            }
+            case 3: {
               clear();
               invertPixels(canvas);
               break;

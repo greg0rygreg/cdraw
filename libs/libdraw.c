@@ -1,4 +1,5 @@
 #include "libdraw.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -9,13 +10,13 @@ struct canvas* initCanvas(int h, int w) {
   if (cs == NULL) return NULL;
   cs->height = h;
   cs->width = w;
-  bool** c = malloc(sizeof(bool*) * h);
+  char** c = malloc(sizeof(char*) * h);
   if (c == NULL) {
     free(cs);
     return NULL;
   }
   for (int i = 0; i < h; i++) {
-    c[i] = malloc(sizeof(bool) * w);
+    c[i] = malloc(sizeof(char) * w);
     if (c[i] == NULL) {
       for (int j = 0; j < i; j++) {
         free(c[j]);
@@ -25,7 +26,7 @@ struct canvas* initCanvas(int h, int w) {
       return NULL;
     }
     for (int j = 0; j < w; j++) {
-      c[i][j] = false;
+      c[i][j] = 0x7;
     }
   }
   cs->pixels = c;
@@ -56,34 +57,47 @@ void setAuthor(struct canvas* c, char* a) {
   c->author = a;
 }
 
-void togglePixel(struct canvas* c, int x, int y) {
-  if (c == NULL) return;
-  if (y-1 >= 0 && y-1 <= c->height-1 && x-1 >= 0 && x-1 <= c->width-1)
-    c->pixels[y-1][x-1] = !c->pixels[y-1][x-1];
+char clampChar(char c) {
+  if (c < 0x0)
+    return 0x0;
+  else if (c > 0x7)
+    return 0x7;
+  else
+    return c;
 }
 
-void setPixel(struct canvas* c, int x, int y, bool v) {
+void setPixel(struct canvas* c, int x, int y, char v) {
   if (c == NULL) return;
   if (y-1 >= 0 && y-1 <= c->height-1 && x-1 >= 0 && x-1 <= c->width-1)
-    c->pixels[y-1][x-1] = v;
+    c->pixels[y-1][x-1] = clampChar(v);
 }
 
-void invertPixels(struct canvas* c) {
+/*void invertPixels(struct canvas* c) {
   if (c == NULL) return;
   for (int y = 0; y < c->height; y++) {
     for (int x = 0; x < c->width; x++)
-      c->pixels[y][x] = !c->pixels[y][x];
+      if (c->pixels[y][x] < 0x3)
+        c->pixels[y][x] = clampChar(c->pixels[y][x] + 0x3);
+      else if (c->pixels[y][x] > 0x3)
+        c->pixels[y][x] = clampChar(c->pixels[y][x] - 0x3);
   }
-}
+}*/
 
 void setTime(struct canvas* c, time_t t) {
   if (c == NULL) return;
   c->time = t;
 }
 
-bool getPixel(struct canvas* c, int x, int y) {
-  if (c == NULL) return false;
+char getPixel(struct canvas* c, int x, int y) {
+  if (c == NULL) return 0x8;
   if (y-1 >= 0 && y-1 <= c->height-1 && x-1 >= 0 && x-1 <= c->width-1)
     return c->pixels[y-1][x-1];
-  return false;
+  return 0x8;
+}
+
+char* formatPixel(struct canvas* c, int x, int y) {
+  // \x1b[xx;yymzz 14
+  char* temp = malloc(sizeof(char) * 14);
+  sprintf(temp, "\x1b[%d;%dm%d%d", getPixel(c, x, y) + 30, getPixel(c, x, y) + 40, getPixel(c, x, y), getPixel(c, x, y));
+  return temp;
 }

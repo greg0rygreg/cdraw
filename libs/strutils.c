@@ -28,7 +28,8 @@ str* strsplit(str s, char d, size_t* lr) {
     v[l - 1] = strdup(w);
     w = strtok(NULL, &d);
   }
-  *lr = l;
+  if (lr != NULL)
+    *lr = l;
   free(tmp);
   return v;
 }
@@ -48,18 +49,18 @@ str strjoin(str* sa, size_t sal, char d) {
   size_t toalloc = 0;
   for (size_t i = 0; i < sal; i++)
     toalloc += strlen(sa[i]);
-  toalloc += sal - 1;
-  toalloc += 1;
+  toalloc += sal - 1 + 1;
   str temp = malloc(toalloc);
   if (!temp) return NULL;
-  temp[0] = 0x00;
+  size_t pos = 0;
   for (size_t i = 0; i < sal; i++) {
-    strcat(temp, sa[i]);
-    if (i < sal - 1) {
-      temp[strlen(temp)] = d;
-      temp[strlen(temp) + 1] = 0x00;
-    }
+    size_t len = strlen(sa[i]);
+    memcpy(&temp[pos], sa[i], len);
+    pos += len;
+    if (i < sal - 1)
+      temp[pos++] = d;
   }
+  temp[pos] = '\0';
   return temp;
 }
 
@@ -121,7 +122,7 @@ void dptrfree(void** dp, size_t ln) {
 
 str strreplace(str s, char c, char r, str* rs) {
   str t = strdup(s);
-  for (int i = 0; i < strlen(t); i++) {
+  for (size_t i = 0; i < strlen(t); i++) {
     if (t[i] == c) {
       t[i] = r;
     }
@@ -136,7 +137,7 @@ str strreplace(str s, char c, char r, str* rs) {
 }
 
 int strhas(str s, char c) {
-  for (int i = 0; i < strlen(s); i++) {
+  for (size_t i = 0; i < strlen(s); i++) {
     if (s[i] == c)
       return 1;
   }

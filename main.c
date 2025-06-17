@@ -1,3 +1,5 @@
+// i kinda hate it & it despises me
+
 #include "libs/libmenu.h"
 #include "libs/strutils.h"
 #include "libs/libdraw.h"
@@ -8,10 +10,16 @@
 #include <time.h>
 
 int main(int argc, str* argv) {
+  // anl -> Author Name Length
   int anl = 128;
+  // fnl -> File Name Length
   int fnl = 512;
+  // fl -> File Length
   int fl = 2048;
-  int debug = 0;
+  // debug
+  _Bool debug = false;
+  // ost -> Old Save Tech
+  _Bool ost = false;
   for (int i = 0; i < argc; i++) {
     if (strcmp("-anl", argv[i]) == 0)
       anl = atoi(argv[i+1]);
@@ -20,10 +28,12 @@ int main(int argc, str* argv) {
     if (strcmp("-fl", argv[i]) == 0)
       fl = atoi(argv[i+1]);
     if (strcmp("-d", argv[i]) == 0)
-      debug = 1;
+      debug = true;
+    if (strcmp("-nst", argv[i]) == 0)
+      ost = true;
   }
   int optionsN = 3;
-  int optionsAN = 3;
+  int optionsAN = 1;
   str* options = malloc(sizeof(str) * optionsN);
   if (!options) return 1;
   // i don't want to hear ANY of you say i need to handle errors in here too.
@@ -37,12 +47,10 @@ int main(int argc, str* argv) {
     dptrfree((void**)options, optionsN);
     return 1;
   }
-  optionsA[0] = strdup("toggle pixel");
-  optionsA[1] = strdup("set pixel");
-  optionsA[2] = strdup("invert every pixel");
+  optionsA[0] = strdup("set pixel");
 
   // i love making my own libs and using them to my advantage
-  Menu* menu = initMenu("Cdraw", "alpha5", options, optionsN, "exit");
+  Menu* menu = initMenu("Cdraw", "beta3-rc2", options, optionsN, "exit");
   // manual memory management is very fun indeed
   // (i hate it)
   if (!menu) {
@@ -54,7 +62,7 @@ int main(int argc, str* argv) {
   if (!drawing) {
     dptrfree((void**)options, optionsN);
     dptrfree((void**)optionsA, optionsAN);
-    // how did this go unnoticed for (around) 16 FUCKING COMMITS????
+    // how did this go unnoticed for such a long time????
     // for context, before it was deallocMenu(menu), it was free(menu),
     // which is very fucking much memory unsafe
     deallocMenu(menu);
@@ -92,13 +100,13 @@ int main(int argc, str* argv) {
           sep();
           break;
         }
-        if (h <= 2) {
-          error("height can't be less than or equal to 2");
+        if (h <= 2 && ost) {
+          error("height can't be less than or equal to 2 with Old Save Tech enabled");
           sep();
           break;
         }
         if ((h >= 15 || w >= 15) && !debug) {
-          error("canvases can't have height or width equal to or greater than 15 pixels (pass -d parameter to skip this check)");
+          error("width/height can't be equal to or greater than 15 pixels (pass the -d parameter to skip this check)");
           sep();
           break;
         }
@@ -114,10 +122,13 @@ int main(int argc, str* argv) {
         while (!b2) {
           for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-              printf("%s", getPixel(canvas, j+1, i+1) ? "@ " : ". ");
+              str s = formatPixel(canvas, j+1, i+1);
+              printf("%s", s);
+              free(s);
             }
             putchar('\n');
           }
+          printf("\x1b[0m");
           sep();
           int dO;
           printAndGetInput(drawing, &dO, 1, 0);
@@ -126,58 +137,48 @@ int main(int argc, str* argv) {
               clear();
               int x;
               int y;
-              printf("X coordinate (1-%d): ", w);
-              scanf("%d", &x);
-              printf("Y coordinate (1-%d): ", h);
-              scanf("%d", &y);
-              // i did better than that as i promised
-              togglePixel(canvas, x, y);
-              clear();
-              break;
-            }
-            case 2: {
-              clear();
-              int x;
-              int y;
               int v;
               printf("X coordinate (1-%d): ", w);
               scanf("%d", &x);
               printf("Y coordinate (1-%d): ", h);
               scanf("%d", &y);
-              printf("value (1 or 0): ");
+              clear();
+              printf("0 = black\n\
+1 = red\n\
+2 = green\n\
+3 = yellow\n\
+4 = blue\n\
+5 = magenta\n\
+6 = cyan\n\
+7 = white\n\
+color number: ");
               scanf("%d", &v);
-              // it's to prevent bad shit from happening and...
-              // I'MMMMMMMM NOOOOOOOOOOOOOOOOT SOORRYYYYYYYYYYYYYYYYYY
-              setPixel(canvas, x, y, (v > 0 ? true : false)); 
+              setPixel(canvas, x, y, v);
               clear();
-              break;
-            }
-            case 3: {
-              clear();
-              invertPixels(canvas);
               break;
             }
             case 0: {
               clear();
-              b2++;
+              printf("are you sure? (y/n) ");
+              ignorePrev();
+              char c = getchar();
+              if (c == 'y' || c == 'Y')
+                b2++;
+              else {
+                clear();
+                break;
+              }
               char aname[anl];
               printf("author name (max. %d characters): ", anl);
               ignorePrev();
               fgets(aname, anl, stdin);
               aname[strlen(aname) - 1] = 0x0;
-              // char[] variables aren't modifiable
-              // horrible fate
-              str nname = strreplace(aname, ';', '_', NULL);
+              str nname = NULL;
+              if (strlen(aname) != 0)
+                strreplace(aname, ';', '_', &nname);
               setAuthor(canvas, nname);
-              // simplifying [ h * w + (h - 1) + 1 ] to [ (h * 2) * w ] doesn't work for some
-              // reason....
-              // also, i've tried redoing the code from this line until the line that sets the
-              // second from last character to a null terminator, but failed MISERABLY as it not
-              // only output garbage memory when height or width were below 2, it started to output
-              // 2 bytes of garbage memory EVERY time at the start, so the check in line 64 will
-              // remain there until i'm smart enough to PREDICT what this god-doesn't-even-know-
-              // what-this-is abomination of code will generate.
-              str cuh1 = malloc(h * w + (h - 1) + 1);
+              // ladies and gentlemen...*
+              str cuh1 = malloc(h * w + h + 1);
               if (cuh1 == NULL) {
                 clear();
                 // truly heartbreaking
@@ -186,16 +187,30 @@ int main(int argc, str* argv) {
                 break;
               }
               int g = 0;
-              for (int i = 0; i < h; i++) {
-                for (int j = 0; j < w; j++) {
-                  cuh1[g] = getPixel(canvas, j+1, i+1) ? '1' : '0';
-                  g++;
+              if (ost) {
+                for (int i = 0; i < h; i++) {
+                  for (int j = 0; j < w; j++) {
+                    cuh1[g++] = getPixel(canvas, j+1, i+1) + 48;
+                  }
+                  if (i < h - 1)
+                    cuh1[g++] = '.';
                 }
-                cuh1[g] = '.';
-                g++;
+              } else {
+                // *i finally did it.
+                for (int i = 0; i < h; i++) {
+                  char* temp = malloc(w);
+                  for (int j = 0; j < w; j++) {
+                    temp[j] = canvas->pixels[i][j] + 48;
+                  }
+                  memcpy(&cuh1[g], temp, w);
+                  free(temp);
+                  g += w;
+                  if (i < h - 1)
+                    cuh1[g++] = '.';
+                }
               }
-              cuh1[strlen(cuh1) - 1] = 0x0;
-              str cuh[] = {"CDC", cuh1, nname};
+              cuh1[g] = 0x0;
+              str cuh[] = {"CDC", cuh1, canvas->author};
               // i love making my own libs and using them to my advantage
               str cuh3 = strjoin(cuh, 3, ';');
               char fname[fnl];
@@ -206,9 +221,8 @@ int main(int argc, str* argv) {
               FILE* file = fopen(fname, "w");
               if (file == NULL) {
                 warning("file could not be opened - data will be printed");
-                // i found using fprintf to output data to stdout funny
-                // ...i'm not sorry
-                fprintf(stdout, "%s;%ld\n", cuh3, canvas->time);
+                // i'm sorry actually'
+                printf("%s;%ld\n", cuh3, canvas->time);
                 sep();
               } else
                 fprintf(file, "%s;%ld", cuh3, canvas->time);
@@ -229,6 +243,8 @@ int main(int argc, str* argv) {
         break;
       }
       case 2: {
+        // i might have to redo this part
+        // surely i won't have to, right?
         clear();
         char fname[fnl];
         printf("filename (max. %d characters & defaults to current directory): ", fnl);
@@ -253,7 +269,6 @@ int main(int argc, str* argv) {
         char buf[fl];
         fgets(buf, fl, file);
         size_t l = 0;
-        size_t lc = 0;
         str* split = strsplit(buf, ';', &l);
         if (strcmp(split[0], "CDC") != 0 || l != 4) {
           error("file is in the wrong format");
@@ -267,18 +282,18 @@ int main(int argc, str* argv) {
         char tb[100];
         str canvas = strdup(split[1]);
         strftime(tb, 100, "%m/%d/%Y @ %H:%M:%S", times);
-        printf("painted by: %s\ntime painted: %s\n\n", split[2], tb);
+        printf("who: %s\nwhen: %s\n\n", split[2], tb);
         // this is terrible fucking code but it's the best i can do
         // so if it works, don't touch it
         for (size_t i = 0; i < strlen(canvas); i++) {
-          if (canvas[i] == '1')
-            printf("@ ");
-          else if (canvas[i] == '0')
-            printf(". ");
-          else if (canvas[i] == '.')
-            printf("\n");
+          if (canvas[i] != '.')
+            // i have no idea why i don't need to put a second integer format specifier
+            // for this specific operation
+            printf("\x1b[%d;%dm%d", canvas[i] - 18, canvas[i] - 8, canvas[i]);
+          else
+            putchar(0xa);
         }
-        printf("\n");
+        printf("\x1b[0m\n");
         dptrfree((void**)split, l);
         free(canvas);
         fclose(file);
@@ -304,5 +319,4 @@ int main(int argc, str* argv) {
   return 0;
 }
 
-// compiling:
-// make
+// use make

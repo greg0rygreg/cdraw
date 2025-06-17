@@ -10,19 +10,31 @@ extern "C" {
 struct canvas {
   int height;
   int width;
-  bool** pixels;
+  char** pixels;
   char* author;
   time_t time;
+};
+
+enum PIXEL {
+  BLACK,
+  RED,
+  GREEN,
+  YELLOW,
+  BLUE,
+  MAGENTA,
+  CYAN,
+  WHITE
 };
 
 struct canvas* initCanvas(int h, int w);
 void delCanvas(struct canvas* c);
 void setAuthor(struct canvas* c, char* a);
-void togglePixel(struct canvas* c, int x, int y);
-void invertPixels(struct canvas* c);
+char clampChar(char c);
+char* formatPixel(struct canvas* c, int x, int y);
 void setTime(struct canvas* c, time_t t);
-bool getPixel(struct canvas* c, int x, int y);
-void setPixel(struct canvas* c, int x, int y, bool v);
+char getPixel(struct canvas* c, int x, int y);
+void setPixel(struct canvas* c, int x, int y, char v);
+//void invertPixels(struct canvas* c);
 
 #ifdef __cplusplus
 }

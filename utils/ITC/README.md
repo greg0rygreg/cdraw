@@ -5,7 +5,7 @@ this program was made to transform any type of image into a Cdraw canvas of any 
 there are 4 variables in the program's code:
 
 ```py
-c_width = 25
+c_width = 50
 img_p = "sample.jpg"
 author = "unknown"
 output = "out/sample.cdc"

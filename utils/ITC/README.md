@@ -8,7 +8,7 @@ there are 4 variables in the program's code:
 c_width = 25
 img_p = "sample.jpg"
 author = "unknown"
-output = "examples/birb.cdc"
+output = "out/sample.cdc"
 ```
 
 `c_width` defines the width of the output canvas  

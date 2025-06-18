@@ -3,10 +3,10 @@ import time
 import sys
 
 #config
-c_width = 100
+c_width = 50
 img_p = "sample.jpg"
 author = "unknown"
-output = "examples/birb.cdc"
+output = "out/sample.cdc"
 
 
 #don't mess

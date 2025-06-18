@@ -23,17 +23,18 @@ enum PIXEL {
   BLUE,
   MAGENTA,
   CYAN,
-  WHITE
+  WHITE,
+  UNKNOWN
 };
 
 struct canvas* initCanvas(int h, int w);
 void delCanvas(struct canvas* c);
 void setAuthor(struct canvas* c, char* a);
-char clampChar(char c);
+enum PIXEL clampPixel(enum PIXEL c);
 char* formatPixel(struct canvas* c, int x, int y);
 void setTime(struct canvas* c, time_t t);
-char getPixel(struct canvas* c, int x, int y);
-void setPixel(struct canvas* c, int x, int y, char v);
+enum PIXEL getPixel(struct canvas* c, int x, int y);
+void setPixel(struct canvas* c, int x, int y, enum PIXEL v);
 //void invertPixels(struct canvas* c);
 
 #ifdef __cplusplus

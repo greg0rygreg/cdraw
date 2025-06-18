@@ -57,19 +57,19 @@ void setAuthor(struct canvas* c, char* a) {
   c->author = a;
 }
 
-char clampChar(char c) {
-  if (c < 0x0)
-    return 0x0;
-  else if (c > 0x7)
-    return 0x7;
+enum PIXEL clampPixel(enum PIXEL c) {
+  if (c < BLACK)
+    return BLACK;
+  else if (c > WHITE)
+    return WHITE;
   else
     return c;
 }
 
-void setPixel(struct canvas* c, int x, int y, char v) {
+void setPixel(struct canvas* c, int x, int y, enum PIXEL v) {
   if (c == NULL) return;
   if (y-1 >= 0 && y-1 <= c->height-1 && x-1 >= 0 && x-1 <= c->width-1)
-    c->pixels[y-1][x-1] = clampChar(v);
+    c->pixels[y-1][x-1] = clampPixel(v);
 }
 
 /*void invertPixels(struct canvas* c) {
@@ -88,11 +88,11 @@ void setTime(struct canvas* c, time_t t) {
   c->time = t;
 }
 
-char getPixel(struct canvas* c, int x, int y) {
-  if (c == NULL) return 0x8;
+enum PIXEL getPixel(struct canvas* c, int x, int y) {
+  if (c == NULL) return UNKNOWN;
   if (y-1 >= 0 && y-1 <= c->height-1 && x-1 >= 0 && x-1 <= c->width-1)
     return c->pixels[y-1][x-1];
-  return 0x8;
+  return UNKNOWN;
 }
 
 char* formatPixel(struct canvas* c, int x, int y) {

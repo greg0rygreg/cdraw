@@ -1,5 +1,5 @@
 # CTI (Cdraw canvas To Image)
-this program was made to transform any Cdraw canvas of any size into a bitmap image of any size (if your storage device supports it)
+this program was made to transform any Cdraw canvas of any size into a bitmap image of any size (if your storage device can handle it)
 
 ## how to use
 there are 4 variables in the program's code:

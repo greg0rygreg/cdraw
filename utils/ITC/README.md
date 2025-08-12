@@ -1,5 +1,5 @@
 # ITC (Image To Cdraw canvas)
-this program was made to transform any type of image into a Cdraw canvas of any size (if your RAM supports it)
+this program was made to transform any type of image into a Cdraw canvas of any size (if your RAM can handle it)
 
 ## how to use
 there are 4 variables in the program's code:

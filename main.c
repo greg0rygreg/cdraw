@@ -30,12 +30,12 @@ int main(int argc, str* argv) {
       psm = true;
   }
   int optionsN = 3;
-  int optionsAN = 1;
+  int optionsAN = 2;
   str options[] = {"make canvas", "view canvas", "info"};
-  str optionsA[] = {"set pixel"};
+  str optionsA[] = {"set pixel", "fill an area of pixels"};
 
   // i love making my own libs and using them to my advantage
-  Menu* menu = initMenu("Cdraw", "beta3", options, optionsN, "exit");
+  Menu* menu = initMenu("Cdraw", "1.0", options, optionsN, "exit");
   if (!menu) {
     return 1;
   }
@@ -100,7 +100,7 @@ int main(int argc, str* argv) {
         }
         setTime(canvas, time(NULL));
         int b2 = 0;
-        str s;
+        char s[20];
         while (!b2) {
           for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
@@ -136,6 +136,37 @@ int main(int argc, str* argv) {
 color number: ");
               scanf("%d", &v);
               setPixel(canvas, x, y, v);
+              clear();
+              break;
+            }
+            case 2: {
+              clear();
+              int x1;
+              int y1;
+              int x2;
+              int y2;
+              int v;
+              printf("X1 coordinate (1-%d): ", w);
+              scanf("%d", &x1);
+              printf("Y1 coordinate (1-%d): ", h);
+              scanf("%d", &y1);
+              printf("X2 coordinate (1-%d): ", w);
+              scanf("%d", &x2);
+              printf("Y2 coordinate (1-%d): ", h);
+              scanf("%d", &y2);
+              clear();
+              printf("colors:\n\
+  0 = black\n\
+  1 = red\n\
+  2 = green\n\
+  3 = yellow\n\
+  4 = blue\n\
+  5 = magenta\n\
+  6 = cyan\n\
+  7 = white\n\
+color number: ");
+              scanf("%d", &v);
+              fillPixels(canvas, x1, y1, x2, y2, v);
               clear();
               break;
             }
@@ -217,7 +248,7 @@ color number: ");
               FILE* file = fopen(fname, "w");
               if (file == NULL) {
                 warning("file could not be opened - data will be printed");
-                // i'm sorry actually'
+                // i'm sorry actually]
                 printf("%s;%ld\n", cuh3, canvas->time);
                 sep();
               } else

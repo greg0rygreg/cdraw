@@ -1,13 +1,10 @@
-// i kinda hate it & it despises me
+// we both hate eachother
 
 #include "libs/libmenu.h"
 #include "libs/strutils.h"
 #include "libs/libdraw.h"
-#include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 int main(int argc, str* argv) {
   // anl -> Author Name Length
@@ -18,8 +15,8 @@ int main(int argc, str* argv) {
   int fl = 2048;
   // debug
   _Bool debug = false;
-  // ost -> Old Save Tech
-  _Bool ost = false;
+  // psm -> Primitive Save Mechanics
+  _Bool psm = false;
   for (int i = 0; i < argc; i++) {
     if (strcmp("-anl", argv[i]) == 0)
       anl = atoi(argv[i+1]);
@@ -29,42 +26,25 @@ int main(int argc, str* argv) {
       fl = atoi(argv[i+1]);
     if (strcmp("-d", argv[i]) == 0)
       debug = true;
-    if (strcmp("-nst", argv[i]) == 0)
-      ost = true;
+    if (strcmp("-psm", argv[i]) == 0)
+      psm = true;
   }
   int optionsN = 3;
   int optionsAN = 1;
-  str* options = malloc(sizeof(str) * optionsN);
-  if (!options) return 1;
-  // i don't want to hear ANY of you say i need to handle errors in here too.
-  // if it says (null) or outputs garbage mem it's YOUR problem for not having
-  // enough memory available at the disposal of this program
-  options[0] = strdup("make canvas");
-  options[1] = strdup("view canvas");
-  options[2] = strdup("info");
-  str* optionsA = malloc(sizeof(str) * optionsAN);
-  if (!optionsA) {
-    dptrfree((void**)options, optionsN);
-    return 1;
-  }
-  optionsA[0] = strdup("set pixel");
+  str options[] = {"make canvas", "view canvas", "info"};
+  str optionsA[] = {"set pixel"};
 
   // i love making my own libs and using them to my advantage
-  Menu* menu = initMenu("Cdraw", "beta3-rc2", options, optionsN, "exit");
-  // manual memory management is very fun indeed
-  // (i hate it)
+  Menu* menu = initMenu("Cdraw", "beta3", options, optionsN, "exit");
   if (!menu) {
-    dptrfree((void**)options, optionsN);
-    dptrfree((void**)optionsA, optionsAN);
     return 1;
   }
   Menu* drawing = initMenu("actions:", "", optionsA, optionsAN, "save canvas & exit");
   if (!drawing) {
-    dptrfree((void**)options, optionsN);
-    dptrfree((void**)optionsA, optionsAN);
     // how did this go unnoticed for such a long time????
     // for context, before it was deallocMenu(menu), it was free(menu),
     // which is very fucking much memory unsafe
+    // 8/12/25 now it's the same one way or another lmfao
     deallocMenu(menu);
     return 1;
   }
@@ -90,6 +70,7 @@ int main(int argc, str* argv) {
         clear();
         int w;
         int h;
+        // yo you guys should try to remake this in HolyC
         printf("width: ");
         scanf("%d", &w);
         printf("height: ");
@@ -100,8 +81,8 @@ int main(int argc, str* argv) {
           sep();
           break;
         }
-        if (h <= 2 && ost) {
-          error("height can't be less than or equal to 2 with Old Save Tech enabled");
+        if (h <= 2 && psm) {
+          error("height can't be less than or equal to 2 (disable PSM (Primitive Save Mechanics) to disable this check)");
           sep();
           break;
         }
@@ -119,14 +100,14 @@ int main(int argc, str* argv) {
         }
         setTime(canvas, time(NULL));
         int b2 = 0;
+        str s;
         while (!b2) {
           for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-              str s = formatPixel(canvas, j+1, i+1);
-              printf("%s", s);
-              free(s);
+              formatPixelB(canvas, j+1, i+1, s, 20);
+              printf("%s\x1b[0m", s);
             }
-            putchar('\n');
+            putchar(10);
           }
           printf("\x1b[0m");
           sep();
@@ -143,14 +124,15 @@ int main(int argc, str* argv) {
               printf("Y coordinate (1-%d): ", h);
               scanf("%d", &y);
               clear();
-              printf("0 = black\n\
-1 = red\n\
-2 = green\n\
-3 = yellow\n\
-4 = blue\n\
-5 = magenta\n\
-6 = cyan\n\
-7 = white\n\
+              printf("colors:\n\
+  0 = black\n\
+  1 = red\n\
+  2 = green\n\
+  3 = yellow\n\
+  4 = blue\n\
+  5 = magenta\n\
+  6 = cyan\n\
+  7 = white\n\
 color number: ");
               scanf("%d", &v);
               setPixel(canvas, x, y, v);
@@ -159,6 +141,18 @@ color number: ");
             }
             case 0: {
               clear();
+              /*
+              for my sake: let not those that seek thee be confounded for my sake, O
+              God of Israel.
+              
+              69:7 Because for thy sake I have borne reproach; shame hath covered my
+              face.
+              
+              69:8 I am become a stranger unto my brethren, and an alien unto my
+              mother's children.
+              
+              69:9 For the zeal of thine house hath eaten me up; and the reproaches
+              */
               printf("are you sure? (y/n) ");
               ignorePrev();
               char c = getchar();
@@ -176,8 +170,10 @@ color number: ");
               str nname = NULL;
               if (strlen(aname) != 0)
                 strreplace(aname, ';', '_', &nname);
+              // this is actually safe because in libdraw.c line 59
+              // i check if if the author is NULL, if it is then
+              // don't free it (avoids IOT instruction)
               setAuthor(canvas, nname);
-              // ladies and gentlemen...*
               str cuh1 = malloc(h * w + h + 1);
               if (cuh1 == NULL) {
                 clear();
@@ -187,16 +183,8 @@ color number: ");
                 break;
               }
               int g = 0;
-              if (ost) {
-                for (int i = 0; i < h; i++) {
-                  for (int j = 0; j < w; j++) {
-                    cuh1[g++] = getPixel(canvas, j+1, i+1) + 48;
-                  }
-                  if (i < h - 1)
-                    cuh1[g++] = '.';
-                }
-              } else {
-                // *i finally did it.
+              if (!psm) {
+                // FUCKING FINALLY
                 for (int i = 0; i < h; i++) {
                   char* temp = malloc(w);
                   for (int j = 0; j < w; j++) {
@@ -208,15 +196,23 @@ color number: ");
                   if (i < h - 1)
                     cuh1[g++] = '.';
                 }
+              } else {
+                for (int i = 0; i < h; i++) {
+                  for (int j = 0; j < w; j++) {
+                    cuh1[g++] = getPixel(canvas, j+1, i+1) + 48;
+                  }
+                  if (i < h - 1)
+                    cuh1[g++] = '.';
+                }
               }
-              cuh1[g] = 0x0;
+              cuh1[g] = 0;
               str cuh[] = {"CDC", cuh1, canvas->author};
               // i love making my own libs and using them to my advantage
               str cuh3 = strjoin(cuh, 3, ';');
               char fname[fnl];
               printf("filename (max. %d characters & defaults to current directory): ", fnl);
               fgets(fname, fnl, stdin);
-              fname[strlen(fname) - 1] = 0x0;
+              fname[strlen(fname) - 1] = 0;
               clear();
               FILE* file = fopen(fname, "w");
               if (file == NULL) {
@@ -283,11 +279,9 @@ color number: ");
         str canvas = strdup(split[1]);
         strftime(tb, 100, "%m/%d/%Y @ %H:%M:%S", times);
         printf("who: %s\nwhen: %s\n\n", split[2], tb);
-        // this is terrible fucking code but it's the best i can do
-        // so if it works, don't touch it
         for (size_t i = 0; i < strlen(canvas); i++) {
           if (canvas[i] != '.')
-            // i have no idea why i don't need to put a second integer format specifier
+            // i have no idea why i don't need to put a fourth integer format specifier
             // for this specific operation
             printf("\x1b[%d;%dm%d", canvas[i] - 18, canvas[i] - 8, canvas[i]);
           else
@@ -319,4 +313,6 @@ color number: ");
   return 0;
 }
 
-// use make
+// that's all folks
+
+// to compile, use make

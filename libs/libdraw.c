@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+int clampI (int min, int max, int v) {
+  return v < min ? min : (v > max ? max : v); // dude
+}
+
 struct canvas* initCanvas(int h, int w) {
   // there's no way this function segfaults a program, right?
   if (h * w == 0) return NULL;
@@ -26,7 +30,7 @@ struct canvas* initCanvas(int h, int w) {
       return NULL;
     }
     for (int j = 0; j < w; j++) {
-      c[i][j] = 0x7;
+      c[i][j] = 7;
     }
   }
   cs->pixels = c;
@@ -44,16 +48,15 @@ struct canvas* initCanvas(int h, int w) {
 
 void delCanvas(struct canvas* c) {
   if (c == NULL) return;
-  for (int i = 0; i < c->height; i++)
-    free(c->pixels[i]);
+  for (int i = 0; i < c->height; i++) free(c->pixels[i]);
   free(c->pixels);
   free(c->author);
   free(c);
 }
 
 void setAuthor(struct canvas* c, char* a) {
-  if (a == NULL || c == NULL) return;
-  free(c->author);
+  if (c == NULL) return;
+  if (c->author != NULL) free(c->author);
   c->author = a;
 }
 
@@ -83,6 +86,31 @@ void setPixel(struct canvas* c, int x, int y, enum PIXEL v) {
   }
 }*/
 
+void fillPixels(Canvas* c, int x1, int y1, int x2, int y2, enum PIXEL v) {
+  if (c == NULL) return;
+  int t;
+  if (x1 > x2) {
+    t = x1;
+    x1 = x2;
+    x2 = t;
+  }
+  if (y1 > y2) {
+    t = y1;
+    y1 = y2;
+    y2 = t;
+  }
+
+  x1 = clampI(1, c->width, x1);
+  x2 = clampI(1, c->width, x2);
+  y1 = clampI(1, c->height, y1);
+  y2 = clampI(1, c->height, y2);
+  for (int y = y1; y <= y2; y++) {
+    for (int x = x1; x <= x2; x++) {
+      setPixel(c, x, y, v);
+    }
+  }
+}
+
 void setTime(struct canvas* c, time_t t) {
   if (c == NULL) return;
   c->time = t;
@@ -97,7 +125,17 @@ enum PIXEL getPixel(struct canvas* c, int x, int y) {
 
 char* formatPixel(struct canvas* c, int x, int y) {
   // \x1b[xx;yymzz 14
-  char* temp = malloc(sizeof(char) * 14);
-  sprintf(temp, "\x1b[%d;%dm%d%d", getPixel(c, x, y) + 30, getPixel(c, x, y) + 40, getPixel(c, x, y), getPixel(c, x, y));
+  // 8/5/25 it's actually 11 because \x1b is 1 character and not 4
+  // 8/11/25 i'll leave it at 14 for safety
+  if (c == NULL) return NULL;
+  enum PIXEL p = getPixel(c, x, y);
+  char* temp = malloc(14);
+  snprintf(temp, 14, "\x1b[%d;%dm%d%d", p + 30, p + 40, p, p);
   return temp;
+}
+
+void formatPixelB(Canvas* c, int x, int y, char* buffer, size_t len) {
+  if (c == NULL) return;
+  enum PIXEL p = getPixel(c, x, y);
+  snprintf(buffer, len, "\x1b[%d;%dm%d%d", p + 30, p + 40, p, p);
 }

@@ -34,7 +34,7 @@ str* strsplit(str s, char d, size_t* lr) {
   return v;
 }
 
-str strinvert(str s) {
+str strreverse(str s) {
   size_t l = strlen(s);
   str tmp = malloc(l);
   if (!tmp) return NULL;
@@ -70,10 +70,10 @@ str strtitlecase(str s) {
   if (temp[0] >= 0x61 && temp[0] <= 0x7a)
     temp[0] -= 0x20;
   for (size_t i = 1; i < strlen(temp); i++) {
-      if (temp[i - 1] == ' ' || temp[i - 1] == '-' || temp[i - 1] == '/' || temp[i - 1] == '\\' || temp[i - 1] == '\n') {
-        if (temp[i] >= 0x61 && temp[i] <= 0x7a)
-          temp[i] -= 0x20;
-      }
+    if (temp[i] >= 0x61 && temp[i] <= 0x7a) {
+      if (temp[i - 1] == ' ' || temp[i - 1] == '-' || temp[i - 1] == '/' || temp[i - 1] == '\\' || temp[i - 1] == '\n')
+        temp[i] -= 0x20;
+    }
   }
   return temp;
 }
@@ -129,11 +129,9 @@ str strreplace(str s, char c, char r, str* rs) {
   }
   if (rs == NULL)
     return t;
-  else {
-    *rs = strdup(t);
-    free(t);
-    return NULL;
-  }
+  *rs = strdup(t);
+  free(t);
+  return NULL;
 }
 
 int strhas(str s, char c) {

@@ -1,6 +1,10 @@
 #ifndef STRUTILS_H
 #define STRUTILS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef char* str;
 
 // returns an array of strings containing
@@ -13,10 +17,10 @@ typedef char* str;
 // `int* lr`: length return
 str* strsplit(str s, char d, unsigned long* lr);
 
-// invert a string
+// reverse a string
 //
 // `str s`: string
-str strinvert(str s);
+str strreverse(str s);
 
 // free a double-pointer variable
 //
@@ -71,5 +75,9 @@ str strreplace(str s, char c, char r, str* rs);
 // `str s`: string
 // `char c`: character to find
 int strhas(str s, char c);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // STRUTILS_H

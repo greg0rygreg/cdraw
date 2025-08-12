@@ -17,7 +17,7 @@ result = "CDC;"
 for y in range(resized.height):
   for x in range(resized.width):
     pix = resized.getpixel((x, y))
-    pix2 = (1 if pix[0] >= 128 else 0, 1 if pix[1] >= 128 else 0, 1 if pix[2] >= 128 else 0)
+    pix2 = (pix[0] >= 128, pix[1] >= 128, pix[2] >= 128)
     result += str(pix2[2] * 4 + pix2[1] * 2 + pix2[0])
   if y < resized.height - 1:
     result += "."

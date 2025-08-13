@@ -1,5 +1,5 @@
 cf = -g -Wall -Wextra
-c = clang $(cf)
+c = gcc $(cf)
 ifeq ($(OS), Windows_NT)
 	del = del /Q
 	e = .exe
@@ -8,22 +8,7 @@ else
 	e = 
 endif
 
-all: main clean
+all: main
 
-main: libmenu.o strutils.o main.o libdraw.o
-	$(c) -o main libmenu.o strutils.o main.o libdraw.o
-
-main.o:
-	$(c) -c main.c
-
-libmenu.o:
-	$(c) -c libs/libmenu.c -o libmenu.o
-
-strutils.o:
-	$(c) -c libs/strutils.c -o strutils.o
-
-libdraw.o:
-	$(c) -c libs/libdraw.c -o libdraw.o
-
-clean:
-	$(del) *.o
+main:
+	$(c) -o main main.c libs/libmenu.c libs/libdraw.c libs/strutils.c

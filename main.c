@@ -1,6 +1,7 @@
 #include "libs/libmenu.h"
 #include "libs/strutils.h"
 #include "libs/libdraw.h"
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -15,6 +16,8 @@ int main(int argc, str* argv) {
   _Bool debug = false;
   // psm -> Primitive Saving Mechanism
   _Bool psm = false;
+  // editing
+  _Bool editing = false;
   for (int i = 0; i < argc; i++) {
     if (strcmp("-anl", argv[i]) == 0)
       anl = atoi(argv[i+1]);
@@ -27,9 +30,9 @@ int main(int argc, str* argv) {
     if (strcmp("-psm", argv[i]) == 0)
       psm = true;
   }
-  int optionsN = 3;
+  int optionsN = 4;
   int optionsAN = 4;
-  str options[] = {"make canvas", "view canvas", "info"};
+  str options[] = {"make canvas", "view canvas", "edit canvas", "info"};
   str optionsA[] = {"set pixel", "fill an area of pixels", "invert all pixels", "invert an area of pixels"};
 
   // i love making my own libs and using them to my advantage
@@ -103,6 +106,7 @@ int main(int argc, str* argv) {
         setTime(canvas, time(NULL));
         int b2 = 0;
         char s[20];
+      editpls:
         while (!b2) {
           for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
@@ -339,21 +343,29 @@ color number: ");
         printf("who: %s\nwhen: %s\n\n", split[2], tb);
         for (size_t i = 0; i < strlen(canvas); i++) {
           if (canvas[i] != '.')
-            // i have no idea why i don't need to put a fourth integer format specifier
-            // for this specific operation
-            printf("\x1b[%d;%dm%d", canvas[i] - 18, canvas[i] - 8, canvas[i]);
+            // found the problem
+            // i was casting char to int which caused, let's say, a 0, to turn into 48
+            printf("\x1b[%d;%dm%c%c", (canvas[i]-'0') + 30, (canvas[i]-'0') + 40, canvas[i], canvas[i]);
           else
             putchar(10);
         }
         printf("\x1b[0m\n");
+        if (debug) printf("%s\n", canvas);
         dptrfree((void**)split, l);
         free(canvas);
         fclose(file);
         sep();
         break;
       }
-      // info
+      // edit canvas
       case 3: {
+        clear();
+        warning("work in progress");
+        sep();
+        break;
+      }
+      // info
+      case 4: {
         clear();
         printf("%s\nlicensed under MIT license\nmade with love and patience by greg\n", FV);
         sep();

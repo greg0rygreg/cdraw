@@ -13,7 +13,7 @@ int main(int argc, str* argv) {
   int fl = 2048;
   // debug
   _Bool debug = false;
-  // psm -> Primitive Save Mechanics
+  // psm -> Primitive Saving Mechanism
   _Bool psm = false;
   for (int i = 0; i < argc; i++) {
     if (strcmp("-anl", argv[i]) == 0)
@@ -53,18 +53,21 @@ int main(int argc, str* argv) {
 
   // do you think it's a good idea to do this?
   // i think it is
-  Menu* menus[] = {menu, drawing};
+  // Menu* menus[] = {menu, drawing};
+  // 8/13/25 it's not
   clear();
   while (!b) {
     int mO;
     printAndGetInput(menu, &mO, 1, 1);
     switch (mO) {
+      // exit
       case 0: {
         clear();
         b++;
         break;
       }
       // hehe funny line
+      // make canvas
       case 1: {
         clear();
         int w;
@@ -81,7 +84,7 @@ int main(int argc, str* argv) {
           break;
         }
         if (h <= 2 && psm) {
-          error("height can't be less than or equal to 2 (disable PSM (Primitive Save Mechanics) to disable this check)");
+          error("height can't be less than or equal to 2 (disable PSM (Primitive Saving Mechanism) to disable this check)");
           sep();
           break;
         }
@@ -113,6 +116,7 @@ int main(int argc, str* argv) {
           int dO;
           printAndGetInput(drawing, &dO, 1, 0);
           switch (dO) {
+            // paint pixel
             case 1: {
               clear();
               int x;
@@ -138,6 +142,7 @@ color number: ");
               clear();
               break;
             }
+            // fill area
             case 2: {
               clear();
               int x1;
@@ -169,11 +174,13 @@ color number: ");
               clear();
               break;
             }
+            // invert pixels
             case 3: {
               clear();
               invertPixels(canvas);
               break;
             }
+            // invert area
             case 4: {
               clear();
               int x1;
@@ -192,6 +199,7 @@ color number: ");
               invertArea(canvas, x1, y1, x2, y2);
               break;
             }
+            // exit
             case 0: {
               clear();
               /*
@@ -259,9 +267,6 @@ color number: ");
                 }
               }
               cuh1[g] = 0;
-              str cuh[] = {"CDC", cuh1, canvas->author};
-              // i love making my own libs and using them to my advantage
-              str cuh3 = strjoin(cuh, 3, ';');
               char fname[fnl];
               printf("filename (max. %d characters & defaults to current directory): ", fnl);
               fgets(fname, fnl, stdin);
@@ -271,16 +276,17 @@ color number: ");
               if (file == NULL) {
                 warning("file could not be opened - data will be printed");
                 // i'm sorry actually]
-                printf("%s;%ld\n", cuh3, canvas->time);
+                printf("CDC;%s;%s;%ld\n", cuh1, canvas->author, canvas->time);
                 sep();
-              } else
-                fprintf(file, "%s;%ld", cuh3, canvas->time);
+              } else {
+                fprintf(file, "CDC;%s;%s;%ld", cuh1, canvas->author, canvas->time);
+                fclose(file);
+              }
               delCanvas(canvas);
               free(cuh1);
-              free(cuh3);
-              if (file) fclose(file);
               break;
             }
+            // fallback
             default: {
               clear();
               inputErr(&dO);
@@ -291,15 +297,14 @@ color number: ");
         }
         break;
       }
+      // view canvas
       case 2: {
-        // i might have to redo this part
-        // surely i won't have to, right?
         clear();
         char fname[fnl];
         printf("filename (max. %d characters & defaults to current directory): ", fnl);
         ignorePrev();
         fgets(fname, fnl, stdin);
-        fname[strlen(fname) - 1] = 0x0;
+        fname[strlen(fname) - 1] = 0;
         FILE* file = fopen(fname, "r");
         clear();
         if (!file) {
@@ -328,9 +333,9 @@ color number: ");
         }
         time_t _time = atoi(split[3]);
         struct tm* times = localtime(&_time);
-        char tb[100];
+        char tb[30];
         str canvas = strdup(split[1]);
-        strftime(tb, 100, "%m/%d/%Y @ %H:%M:%S", times);
+        strftime(tb, 30, "%m/%d/%Y @ %H:%M:%S", times);
         printf("who: %s\nwhen: %s\n\n", split[2], tb);
         for (size_t i = 0; i < strlen(canvas); i++) {
           if (canvas[i] != '.')
@@ -338,7 +343,7 @@ color number: ");
             // for this specific operation
             printf("\x1b[%d;%dm%d", canvas[i] - 18, canvas[i] - 8, canvas[i]);
           else
-            putchar(0xa);
+            putchar(10);
         }
         printf("\x1b[0m\n");
         dptrfree((void**)split, l);
@@ -347,12 +352,14 @@ color number: ");
         sep();
         break;
       }
+      // info
       case 3: {
         clear();
         printf("%s\nlicensed under MIT license\nmade with love and patience by greg\n", FV);
         sep();
         break;
       }
+      // fallback
       default: {
         clear();
         inputErr(&mO);
@@ -361,7 +368,8 @@ color number: ");
       }
     }
   }
-  for (int i = 0; i < 2; i++) deallocMenu(menus[i]);
+  deallocMenu(menu);
+  deallocMenu(drawing);
   free(FV);
   return 0;
 }

@@ -64,9 +64,10 @@ void warning(char* info) {
   printf("\x1b[1;33mwarning:\x1b[0m\x1b[1m %s\x1b[0m\n", info);
 }
 void inputErr(int *input) {
-  char _temp[50];
+  /*char _temp[50];
   sprintf(_temp, "no option made for input %d", *input);
-  error(_temp);
+  error(_temp);*/
+  printf("\x1b[1;31merror:\x1b[0m\x1b[1m no option made for input %d\x1b[0m\n", *input);
 }
 
 /* ------------------------- * OTHER * ------------------------- */

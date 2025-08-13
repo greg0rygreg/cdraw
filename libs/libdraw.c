@@ -75,16 +75,22 @@ void setPixel(struct canvas* c, int x, int y, enum PIXEL v) {
     c->pixels[y-1][x-1] = clampPixel(v);
 }
 
-/*void invertPixels(struct canvas* c) {
+enum PIXEL getPixel(struct canvas* c, int x, int y) {
+  if (c == NULL) return UNKNOWN;
+  if (y-1 >= 0 && y-1 <= c->height-1 && x-1 >= 0 && x-1 <= c->width-1)
+    return c->pixels[y-1][x-1];
+  return UNKNOWN;
+}
+
+void invertPixels(struct canvas* c) {
   if (c == NULL) return;
-  for (int y = 0; y < c->height; y++) {
-    for (int x = 0; x < c->width; x++)
-      if (c->pixels[y][x] < 0x3)
-        c->pixels[y][x] = clampChar(c->pixels[y][x] + 0x3);
-      else if (c->pixels[y][x] > 0x3)
-        c->pixels[y][x] = clampChar(c->pixels[y][x] - 0x3);
+  int t[] = {7, 6, 5, 4, 3, 2, 1, 0};
+  for (int y = 0; y <= c->height; y++) {
+    for (int x = 0; x <= c->width; x++) {
+      setPixel(c, x, y, t[getPixel(c, x, y)]);
+    }
   }
-}*/
+}
 
 void fillPixels(Canvas* c, int x1, int y1, int x2, int y2, enum PIXEL v) {
   if (c == NULL) return;
@@ -114,13 +120,6 @@ void fillPixels(Canvas* c, int x1, int y1, int x2, int y2, enum PIXEL v) {
 void setTime(struct canvas* c, time_t t) {
   if (c == NULL) return;
   c->time = t;
-}
-
-enum PIXEL getPixel(struct canvas* c, int x, int y) {
-  if (c == NULL) return UNKNOWN;
-  if (y-1 >= 0 && y-1 <= c->height-1 && x-1 >= 0 && x-1 <= c->width-1)
-    return c->pixels[y-1][x-1];
-  return UNKNOWN;
 }
 
 char* formatPixel(struct canvas* c, int x, int y) {

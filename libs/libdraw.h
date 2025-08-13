@@ -57,7 +57,7 @@ void fillPixels(Canvas* c, int x1, int y1, int x2, int y2, enum PIXEL v);
 
 // format a pixel, but print it to `buffer`
 void formatPixelB(Canvas* c, int x, int y, char* buffer, size_t len);
-//void invertPixels(struct canvas* c);
+void invertPixels(struct canvas* c);
 
 #ifdef __cplusplus
 }

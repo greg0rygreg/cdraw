@@ -1,5 +1,3 @@
-// we both hate eachother
-
 #include "libs/libmenu.h"
 #include "libs/strutils.h"
 #include "libs/libdraw.h"
@@ -30,12 +28,12 @@ int main(int argc, str* argv) {
       psm = true;
   }
   int optionsN = 3;
-  int optionsAN = 2;
+  int optionsAN = 3;
   str options[] = {"make canvas", "view canvas", "info"};
-  str optionsA[] = {"set pixel", "fill an area of pixels"};
+  str optionsA[] = {"set pixel", "fill an area of pixels", "invert all pixels"};
 
   // i love making my own libs and using them to my advantage
-  Menu* menu = initMenu("Cdraw", "1.0", options, optionsN, "exit");
+  Menu* menu = initMenu("Cdraw", "1.1", options, optionsN, "exit");
   if (!menu) {
     return 1;
   }
@@ -66,6 +64,7 @@ int main(int argc, str* argv) {
         b++;
         break;
       }
+      // hehe funny line
       case 1: {
         clear();
         int w;
@@ -168,6 +167,11 @@ color number: ");
               scanf("%d", &v);
               fillPixels(canvas, x1, y1, x2, y2, v);
               clear();
+              break;
+            }
+            case 3: {
+              clear();
+              invertPixels(canvas);
               break;
             }
             case 0: {
@@ -345,5 +349,4 @@ color number: ");
 }
 
 // that's all folks
-
 // to compile, use make

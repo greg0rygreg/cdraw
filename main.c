@@ -28,12 +28,12 @@ int main(int argc, str* argv) {
       psm = true;
   }
   int optionsN = 3;
-  int optionsAN = 3;
+  int optionsAN = 4;
   str options[] = {"make canvas", "view canvas", "info"};
-  str optionsA[] = {"set pixel", "fill an area of pixels", "invert all pixels"};
+  str optionsA[] = {"set pixel", "fill an area of pixels", "invert all pixels", "invert an area of pixels"};
 
   // i love making my own libs and using them to my advantage
-  Menu* menu = initMenu("Cdraw", "1.1", options, optionsN, "exit");
+  Menu* menu = initMenu("Cdraw", "1.2", options, optionsN, "exit");
   if (!menu) {
     return 1;
   }
@@ -172,6 +172,24 @@ color number: ");
             case 3: {
               clear();
               invertPixels(canvas);
+              break;
+            }
+            case 4: {
+              clear();
+              int x1;
+              int y1;
+              int x2;
+              int y2;
+              printf("X1 coordinate (1-%d): ", w);
+              scanf("%d", &x1);
+              printf("Y1 coordinate (1-%d): ", h);
+              scanf("%d", &y1);
+              printf("X2 coordinate (1-%d): ", w);
+              scanf("%d", &x2);
+              printf("Y2 coordinate (1-%d): ", h);
+              scanf("%d", &y2);
+              clear();
+              invertArea(canvas, x1, y1, x2, y2);
               break;
             }
             case 0: {

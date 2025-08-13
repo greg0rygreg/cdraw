@@ -92,6 +92,32 @@ void invertPixels(struct canvas* c) {
   }
 }
 
+void invertArea(Canvas* c, int x1, int y1, int x2, int y2) {
+  if (c == NULL) return;
+  int t2[] = {7, 6, 5, 4, 3, 2, 1, 0};
+  int t;
+  if (x1 > x2) {
+    t = x1;
+    x1 = x2;
+    x2 = t;
+  }
+  if (y1 > y2) {
+    t = y1;
+    y1 = y2;
+    y2 = t;
+  }
+
+  x1 = clampI(1, c->width, x1);
+  x2 = clampI(1, c->width, x2);
+  y1 = clampI(1, c->height, y1);
+  y2 = clampI(1, c->height, y2);
+  for (int y = y1; y <= y2; y++) {
+    for (int x = x1; x <= x2; x++) {
+      setPixel(c, x, y, t2[getPixel(c, x, y)]);
+    }
+  }
+}
+
 void fillPixels(Canvas* c, int x1, int y1, int x2, int y2, enum PIXEL v) {
   if (c == NULL) return;
   int t;

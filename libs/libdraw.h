@@ -52,12 +52,17 @@ enum PIXEL getPixel(struct canvas* c, int x, int y);
 // to a certain `enum PIXEL` value
 void setPixel(struct canvas* c, int x, int y, enum PIXEL v);
 
-// fill a part of a certain canvas with a certain color
+// fill a certain area of a certain canvas with a certain color
 void fillPixels(Canvas* c, int x1, int y1, int x2, int y2, enum PIXEL v);
 
 // format a pixel, but print it to `buffer`
 void formatPixelB(Canvas* c, int x, int y, char* buffer, size_t len);
+
+// invert the colors of every pixel in a certain canvas
 void invertPixels(struct canvas* c);
+
+// invert the colors of a certain area in a certain canvas
+void invertArea(Canvas* c, int x1, int y1, int x2, int y2);
 
 #ifdef __cplusplus
 }

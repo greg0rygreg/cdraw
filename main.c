@@ -66,10 +66,10 @@ int main(int argc, str* argv) {
   if (!drawing) {
     error("allocation for drawing menu failed, exiting");
     deallocMenu(menu);
+    // hehe funny line
     return 1;
   }
 
-  // hehe funny line
   str FV = getFormattedVersion(menu, true);
   int b = 0;
 
@@ -417,9 +417,9 @@ color number: ");
         str huh = strdup(split[1]);
         size_t l2 = 0;
         str* huh2 = strsplit(huh, '.', &l2);
+        // funnier line
         Canvas* canvas = initCanvas(l2, strlen(huh2[0]));
         for (size_t i = 0; i < l2; i++) {
-          // funnier line
           for (size_t j = 0; j < strlen(huh2[i]); j++) {
             setPixel(canvas, i, j, huh2[i][j]-'0');
           }

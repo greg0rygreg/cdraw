@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 /* ------------------------- * INITIALIZATION * ------------------------- */
-Menu* initMenu(char* name, char* version, char** options, long unsigned optionsN, char* exitText) {
+Menu* initMenu(char* name, char* version, char** options, long unsigned optionsN, char* exitText, bool isSubmenu) {
   Menu* menu = (Menu*)malloc(sizeof(Menu));
   if (!menu) return NULL;
   menu->name = name;
@@ -12,22 +12,32 @@ Menu* initMenu(char* name, char* version, char** options, long unsigned optionsN
   menu->optionsN = optionsN;
   menu->options = options;
   menu->exitText = exitText;
+  // since libmenu is open source, you can just
+  // comment this part out so that libmenu won't
+  // assume that your menu is a submenu if the
+  // version parameter is empty
+  if (strlen(version) == 0)
+    menu->isSubmenu = true;
+  else
+    menu->isSubmenu = isSubmenu;
   return menu;
 }
 
 /* ------------------------- * VERSION FORMATTING... what * ------------------------- */
-char* getFormattedVersion(Menu* menu, int includeVersion) {
-  char* _temp = (char*)malloc(strlen(menu->name) + (includeVersion ? strlen(menu->version) + 5 : 1));
+char* getFormattedVersion(Menu* menu, bool includeVersion) {
+  char* _temp = (char*)malloc(strlen(menu->name) + strlen(menu->version) + 5);
   if (!_temp) return NULL;
-  if (includeVersion)
-    sprintf(_temp, "%s v. %s", menu->name, menu->version);
-  else
-    sprintf(_temp, "%s", menu->name);
+  if (includeVersion && !menu->isSubmenu)
+    snprintf(_temp, strlen(menu->name) + strlen(menu->version) + 5, "%s v. %s", menu->name, menu->version);
+  else {
+    _temp = realloc(_temp, strlen(menu->name) + 1);
+    snprintf(_temp, strlen(menu->name) + 1, "%s", menu->name);
+  }
   return _temp;
 }
 
 /* ------------------------- * STDIN OPERATIONS * ------------------------- */
-void printAndGetInput(Menu* menu, int *optionInt, int printName, int includeVersion) {
+void printAndGetInput(Menu* menu, int *optionInt, bool printName, bool includeVersion) {
   *optionInt = 0; // that's all it took... interesting
   char* _temp = getFormattedVersion(menu, includeVersion);
   if (printName)

@@ -1,6 +1,7 @@
 #ifndef LIBMENU_H
 #define LIBMENU_H
 #include <stdio.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,17 +18,19 @@ typedef struct menu {
   long unsigned optionsN;
   //menu exit text
   char* exitText;
+  //is submenu?
+  bool isSubmenu;
 } Menu;
 
 //menu configurator
-Menu* initMenu(char* name, char* version, char* options[], long unsigned optionsN, char* exitText);
+Menu* initMenu(char* name, char* version, char* options[], long unsigned optionsN, char* exitText, bool isSubmenu);
 
 /*get a formatted string of the name and version of the menu
 
 `int includeVersion`: defines if you want to include `Menu->version`,
 useful for submenus
 */
-char* getFormattedVersion(Menu* menu, int includeVersion);
+char* getFormattedVersion(Menu* menu, bool includeVersion);
 
 /*print a menu, get user input and put it
 on `optionInt`
@@ -40,7 +43,7 @@ else, don't print them
 on the menu name header, useful for submenus that have set their version
 to an empty string
 */
-void printAndGetInput(Menu* menu, int *optionInt, int printName, int includeVersion);
+void printAndGetInput(Menu* menu, int *optionInt, bool printName, bool includeVersion);
 
 //deallocates a menu, just a free()
 void deallocMenu(Menu* menu);

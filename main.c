@@ -1,9 +1,9 @@
 #include "libs/libmenu.h"
 #include "libs/strutils.h"
 #include "libs/libdraw.h"
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#define VERSION "1.3.0"
 
 int main(int argc, str* argv) {
   // anl -> Author Name Length
@@ -12,12 +12,12 @@ int main(int argc, str* argv) {
   int fnl = 512;
   // fl -> File Length
   int fl = 2048;
-  // debug
-  _Bool debug = false;
+  // devmode -> Developer Mode
+  bool devmode = false;
   // psm -> Primitive Saving Mechanism
-  _Bool psm = false;
+  bool psm = false;
   // editing
-  _Bool editing = false;
+  bool editing = false;
   for (int i = 0; i < argc; i++) {
     if (strcmp("-anl", argv[i]) == 0)
       anl = atoi(argv[i+1]);
@@ -25,43 +25,62 @@ int main(int argc, str* argv) {
       fnl = atoi(argv[i+1]);
     if (strcmp("-fl", argv[i]) == 0)
       fl = atoi(argv[i+1]);
-    if (strcmp("-d", argv[i]) == 0)
-      debug = true;
+    if (strcmp("-dm", argv[i]) == 0)
+      devmode = true;
     if (strcmp("-psm", argv[i]) == 0)
       psm = true;
   }
-  int optionsN = 4;
-  int optionsAN = 4;
-  str options[] = {"make canvas", "view canvas", "edit canvas", "info"};
-  str optionsA[] = {"set pixel", "fill an area of pixels", "invert all pixels", "invert an area of pixels"};
 
-  // i love making my own libs and using them to my advantage
-  Menu* menu = initMenu("Cdraw", "1.2", options, optionsN, "exit");
+  // I love making my own libs and using them to my advantage
+  Menu* menu = initMenu(
+    "Cdraw",
+    VERSION,
+    (str[]){
+      "make canvas",
+      "view canvas",
+      "edit canvas",
+      "info"
+    },
+    4,
+    "exit",
+    false
+  );
   if (!menu) {
+    error("allocation for main menu failed, exiting");
     return 1;
   }
-  Menu* drawing = initMenu("actions:", "", optionsA, optionsAN, "save canvas & exit");
+
+  Menu* drawing = initMenu(
+    "actions:",
+    "",
+    (str[]){
+      "set pixel",
+      "fill an area of pixels",
+      "invert all pixels",
+      "invert an area of pixels"
+    },
+    4,
+    "save canvas & exit",
+    true
+  );
   if (!drawing) {
-    // how did this go unnoticed for such a long time????
-    // for context, before it was deallocMenu(menu), it was free(menu),
-    // which is very fucking much memory unsafe
-    // 8/12/25 now it's the same one way or another lmfao
+    error("allocation for drawing menu failed, exiting");
     deallocMenu(menu);
     return 1;
   }
 
-  str FV = getFormattedVersion(menu, 1);
-
+  // hehe funny line
+  str FV = getFormattedVersion(menu, true);
   int b = 0;
 
   // do you think it's a good idea to do this?
-  // i think it is
+  // I think it is
   // Menu* menus[] = {menu, drawing};
   // 8/13/25 it's not
   clear();
   while (!b) {
     int mO;
-    printAndGetInput(menu, &mO, 1, 1);
+    printAndGetInput(menu, &mO, true, true);
     switch (mO) {
       // exit
       case 0: {
@@ -69,7 +88,6 @@ int main(int argc, str* argv) {
         b++;
         break;
       }
-      // hehe funny line
       // make canvas
       case 1: {
         clear();
@@ -91,13 +109,13 @@ int main(int argc, str* argv) {
           sep();
           break;
         }
-        if ((h >= 15 || w >= 15) && !debug) {
-          error("width/height can't be equal to or greater than 15 pixels (pass the -d parameter to skip this check)");
+        if ((h >= 15 || w >= 15) && !devmode) {
+          error("width/height can't be equal to or greater than 15 pixels (pass the -dm parameter to skip this check)");
           sep();
           break;
         }
-        // i love making my own libs and using them to my advantage
-        struct canvas* canvas = initCanvas(h, w);
+        // I love making my own libs and using them to my advantage
+        Canvas* canvas = initCanvas(h, w);
         if (canvas == NULL) {
           error("failed to allocate canvas - breaking now");
           sep();
@@ -118,7 +136,7 @@ int main(int argc, str* argv) {
           printf("\x1b[0m");
           sep();
           int dO;
-          printAndGetInput(drawing, &dO, 1, 0);
+          printAndGetInput(drawing, &dO, true, false);
           switch (dO) {
             // paint pixel
             case 1: {
@@ -231,13 +249,17 @@ color number: ");
               printf("author name (max. %d characters): ", anl);
               ignorePrev();
               fgets(aname, anl, stdin);
+              // some C veteran is gonna tell me this is super unsafe
+              if (strcmp(aname, "\n") == 0) {
+                memcpy(aname, "unknowna", 9);
+              }
               aname[strlen(aname) - 1] = 0x0;
               str nname = NULL;
               if (strlen(aname) != 0)
                 strreplace(aname, ';', '_', &nname);
-              // this is actually safe because in libdraw.c line 59
-              // i check if if the author is NULL, if it is then
-              // don't free it (avoids IOT instruction)
+              // this is actually safe because in libdraw.c
+              // I check if if the author is NULL, if it is
+              // then don't free it (avoids IOT instruction)
               setAuthor(canvas, nname);
               str cuh1 = malloc(h * w + h + 1);
               if (cuh1 == NULL) {
@@ -279,15 +301,18 @@ color number: ");
               FILE* file = fopen(fname, "w");
               if (file == NULL) {
                 warning("file could not be opened - data will be printed");
-                // i'm sorry actually]
+                // I'm sorry actually]
                 printf("CDC;%s;%s;%ld\n", cuh1, canvas->author, canvas->time);
                 sep();
               } else {
                 fprintf(file, "CDC;%s;%s;%ld", cuh1, canvas->author, canvas->time);
                 fclose(file);
               }
-              delCanvas(canvas);
-              free(cuh1);
+              if (!editing){
+                delCanvas(canvas);
+                free(cuh1);
+              } else {
+              }
               break;
             }
             // fallback
@@ -317,12 +342,12 @@ color number: ");
           break;
         }
         /*
-           _ _                         _                               
-          (_| )_ __ ___    _ __   ___ | |_   ___  ___  _ __ _ __ _   _ 
-          | |/| '_ ` _ \  | '_ \ / _ \| __| / __|/ _ \| '__| '__| | | |
-          | | | | | | | | | | | | (_) | |_  \__ \ (_) | |  | |  | |_| |
-          |_| |_| |_| |_| |_| |_|\___/ \__| |___/\___/|_|  |_|   \__, |
-                                                                  |___/
+          ██╗███╗   ███╗    ███╗   ██╗ ██████╗ ████████╗    ███████╗ ██████╗ ██████╗ ██████╗ ██╗   ██╗
+          ██║████╗ ████║    ████╗  ██║██╔═══██╗╚══██╔══╝    ██╔════╝██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝
+          ██║██╔████╔██║    ██╔██╗ ██║██║   ██║   ██║       ███████╗██║   ██║██████╔╝██████╔╝ ╚████╔╝
+          ██║██║╚██╔╝██║    ██║╚██╗██║██║   ██║   ██║       ╚════██║██║   ██║██╔══██╗██╔══██╗  ╚██╔╝
+          ██║██║ ╚═╝ ██║    ██║ ╚████║╚██████╔╝   ██║       ███████║╚██████╔╝██║  ██║██║  ██║   ██║
+          ╚═╝╚═╝     ╚═╝    ╚═╝  ╚═══╝ ╚═════╝    ╚═╝       ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
         */
         char buf[fl];
         fgets(buf, fl, file);
@@ -344,13 +369,13 @@ color number: ");
         for (size_t i = 0; i < strlen(canvas); i++) {
           if (canvas[i] != '.')
             // found the problem
-            // i was casting char to int which caused, let's say, a 0, to turn into 48
+            // I was casting char to int which caused, let's say, a 0, to turn into 48
             printf("\x1b[%d;%dm%c%c", (canvas[i]-'0') + 30, (canvas[i]-'0') + 40, canvas[i], canvas[i]);
           else
             putchar(10);
         }
         printf("\x1b[0m\n");
-        if (debug) printf("%s\n", canvas);
+        if (devmode) printf("%s\n", canvas);
         dptrfree((void**)split, l);
         free(canvas);
         fclose(file);
@@ -362,6 +387,50 @@ color number: ");
         clear();
         warning("work in progress");
         sep();
+        break;
+
+        // actual working part
+        editing = true;
+        char fname[fnl];
+        printf("filename (max. %d characters & defaults to current directory): ", fnl);
+        ignorePrev();
+        fgets(fname, fnl, stdin);
+        fname[strlen(fname) - 1] = 0;
+        FILE* file = fopen(fname, "r");
+        clear();
+        if (!file) {
+          error("file doesn't exist");
+          sep();
+          break;
+        }
+        char buf[fl];
+        fgets(buf, fl, file);
+        fclose(file);
+        size_t l = 0;
+        str* split = strsplit(buf, ';', &l);
+        if (strcmp(split[0], "CDC") != 0 || l != 4) {
+          error("file is in the wrong format");
+          sep();
+          dptrfree((void**)split, l);
+          break;
+        }
+        str huh = strdup(split[1]);
+        size_t l2 = 0;
+        str* huh2 = strsplit(huh, '.', &l2);
+        Canvas* canvas = initCanvas(l2, strlen(huh2[0]));
+        for (size_t i = 0; i < l2; i++) {
+          // funnier line
+          for (size_t j = 0; j < strlen(huh2[i]); j++) {
+            setPixel(canvas, i, j, huh2[i][j]-'0');
+          }
+        }
+        goto editpls;
+      done:
+        editing = false;
+        dptrfree((void**)split, l);
+        free(huh);
+        dptrfree((void**)huh2, l2);
+        delCanvas(canvas);
         break;
       }
       // info

@@ -253,7 +253,7 @@ color number: ");
               if (strcmp(aname, "\n") == 0) {
                 memcpy(aname, "unknowna", 9);
               }
-              aname[strlen(aname) - 1] = 0x0;
+              aname[strlen(aname) - 1] = 0;
               str nname = NULL;
               if (strlen(aname) != 0)
                 strreplace(aname, ';', '_', &nname);

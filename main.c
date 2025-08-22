@@ -1,8 +1,9 @@
-#include "libs/libmenu.h"
+#include "libs/libmenuR.h"
 #include "libs/strutils.h"
 #include "libs/libdraw.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #define VERSION "1.3.0"
 
 int main(int argc, str* argv) {
@@ -32,7 +33,7 @@ int main(int argc, str* argv) {
   }
 
   // I love making my own libs and using them to my advantage
-  Menu* menu = initMenu(
+  lm_menu* menu = make_menu(
     "Cdraw",
     VERSION,
     (str[]){
@@ -50,9 +51,9 @@ int main(int argc, str* argv) {
     return 1;
   }
 
-  Menu* drawing = initMenu(
+  lm_menu* drawing = make_menu(
     "actions:",
-    "",
+    NULL,
     (str[]){
       "set pixel",
       "fill an area of pixels",
@@ -65,12 +66,10 @@ int main(int argc, str* argv) {
   );
   if (!drawing) {
     error("allocation for drawing menu failed, exiting");
-    deallocMenu(menu);
     // hehe funny line
+    unmake_menu(menu);
     return 1;
   }
-
-  const str FV = getFormattedVersion(menu, true);
   int b = 0;
 
   // do you think it's a good idea to do this?
@@ -79,9 +78,8 @@ int main(int argc, str* argv) {
   // 8/13/25 it's not
   clear();
   while (!b) {
-    int mO;
-    printAndGetInput(menu, &mO, true, true);
-    switch (mO) {
+    get_input(menu, true);
+    switch (menu->last_selection) {
       // exit
       case 0: {
         clear();
@@ -135,9 +133,8 @@ int main(int argc, str* argv) {
           }
           printf("\x1b[0m");
           sep();
-          int dO;
-          printAndGetInput(drawing, &dO, true, false);
-          switch (dO) {
+          get_input(drawing, true);
+          switch (drawing->last_selection) {
             // paint pixel
             case 1: {
               clear();
@@ -237,7 +234,7 @@ color number: ");
               69:9 For the zeal of thine house hath eaten me up; and the reproaches
               */
               printf("are you sure? (y/n) ");
-              ignorePrev();
+              ignore_previous_input();
               char c = getchar();
               if (c == 'y' || c == 'Y')
                 b2++;
@@ -247,7 +244,7 @@ color number: ");
               }
               char aname[anl];
               printf("author name (max. %d characters): ", anl);
-              ignorePrev();
+              ignore_previous_input();
               fgets(aname, anl, stdin);
               // some C veteran is gonna tell me this is super unsafe
               if (strcmp(aname, "\n") == 0)
@@ -315,7 +312,7 @@ color number: ");
             // fallback
             default: {
               clear();
-              inputErr(&dO);
+              error("no option made for selection %d", drawing->last_selection);
               sep();
               break;
             }
@@ -328,7 +325,7 @@ color number: ");
         clear();
         char fname[fnl];
         printf("filename (max. %d characters & defaults to current directory): ", fnl);
-        ignorePrev();
+        ignore_previous_input();
         fgets(fname, fnl, stdin);
         fname[strlen(fname) - 1] = 0;
         FILE* file = fopen(fname, "r");
@@ -390,7 +387,7 @@ color number: ");
         editing = true;
         char fname[fnl];
         printf("filename (max. %d characters & defaults to current directory): ", fnl);
-        ignorePrev();
+        ignore_previous_input();
         fgets(fname, fnl, stdin);
         fname[strlen(fname) - 1] = 0;
         FILE* file = fopen(fname, "r");
@@ -432,22 +429,21 @@ color number: ");
       // info
       case 4: {
         clear();
-        printf("%s\nlicensed under MIT license\nmade with love and patience by greg\n", FV);
+        printf("%s v. %s\nlicensed under MIT license\nmade with love and patience by greg\n", menu->name, menu->version);
         sep();
         break;
       }
       // fallback
       default: {
         clear();
-        inputErr(&mO);
+        error("no option made for selection %d", menu->last_selection);
         sep();
         break;
       }
     }
   }
-  deallocMenu(menu);
-  deallocMenu(drawing);
-  free(FV);
+  unmake_menu(menu);
+  unmake_menu(drawing);
   return 0;
 }
 

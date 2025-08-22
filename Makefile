@@ -11,4 +11,4 @@ endif
 all: main
 
 main:
-	$(c) -o main main.c libs/libmenu.c libs/libdraw.c libs/strutils.c
+	$(c) -o main main.c libs/libmenuR.c libs/libdraw.c libs/strutils.c

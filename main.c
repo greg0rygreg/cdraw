@@ -70,7 +70,7 @@ int main(int argc, str* argv) {
     return 1;
   }
 
-  str FV = getFormattedVersion(menu, true);
+  const str FV = getFormattedVersion(menu, true);
   int b = 0;
 
   // do you think it's a good idea to do this?
@@ -250,9 +250,8 @@ color number: ");
               ignorePrev();
               fgets(aname, anl, stdin);
               // some C veteran is gonna tell me this is super unsafe
-              if (strcmp(aname, "\n") == 0) {
+              if (strcmp(aname, "\n") == 0)
                 memcpy(aname, "unknowna", 9);
-              }
               aname[strlen(aname) - 1] = 0;
               str nname = NULL;
               if (strlen(aname) != 0)
@@ -274,9 +273,8 @@ color number: ");
                 // FUCKING FINALLY
                 for (int i = 0; i < h; i++) {
                   char* temp = malloc(w);
-                  for (int j = 0; j < w; j++) {
+                  for (int j = 0; j < w; j++)
                     temp[j] = canvas->pixels[i][j] + 48;
-                  }
                   memcpy(&cuh1[g], temp, w);
                   free(temp);
                   g += w;
@@ -285,9 +283,8 @@ color number: ");
                 }
               } else {
                 for (int i = 0; i < h; i++) {
-                  for (int j = 0; j < w; j++) {
+                  for (int j = 0; j < w; j++)
                     cuh1[g++] = getPixel(canvas, j+1, i+1) + 48;
-                  }
                   if (i < h - 1)
                     cuh1[g++] = '.';
                 }
@@ -417,12 +414,11 @@ color number: ");
         str huh = strdup(split[1]);
         size_t l2 = 0;
         str* huh2 = strsplit(huh, '.', &l2);
-        // funnier line
         Canvas* canvas = initCanvas(l2, strlen(huh2[0]));
         for (size_t i = 0; i < l2; i++) {
-          for (size_t j = 0; j < strlen(huh2[i]); j++) {
+          for (size_t j = 0; j < strlen(huh2[i]); j++)
+            // funnier line
             setPixel(canvas, i, j, huh2[i][j]-'0');
-          }
         }
         goto editpls;
       done:

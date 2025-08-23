@@ -7,4 +7,4 @@ else
 endif
 
 all:
-	$(c) -o main$(e) main.c libs/libmenuR.c libs/libdraw.c libs/strutils.c
+	$(c) -o main$(e) main.c libs/libmenu.c libs/libdraw.c libs/strutils.c

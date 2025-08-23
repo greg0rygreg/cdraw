@@ -1,9 +1,9 @@
-#ifndef LIBMENUR_H
-#define LIBMENUR_H
+#ifndef LIBMENU_H
+#define LIBMENU_H
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct {
+typedef struct lm_menu {
   char *name;
   char *version;
   char **options;
@@ -14,11 +14,11 @@ typedef struct {
 } lm_menu;
 
 lm_menu *make_menu(
-  char* name,
-  char* version,
-  char** options,
+  char *name,
+  char *version,
+  char **options,
   uint8_t options_l,
-  char* exit_t,
+  char *exit_t,
   bool submenu
 );
 
@@ -45,4 +45,4 @@ void warning(
   ...
 );
 
-#endif // LIBMENUR_H
+#endif // LIBMENU_H

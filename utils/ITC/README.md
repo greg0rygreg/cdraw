@@ -16,12 +16,13 @@ output = "out/sample.cdc"
 `author` defines the author's name (you or the maker of the image)  
 `output` defines the path where the canvas will be put onto
 
-change those to your liking, run the program, and before you know it, it's done
+change those to your liking, run the program, and ~~before~~ AFTER you know it, it's done
 
 ## how to view
 
 compile & open Cdraw, but set the `-fl` parameter to the size of the file + 1, so if your file is 3000 bytes big,
-set the `-fl` parameter to 3001  
+set the `-fl` parameter to 3001
+
 like this:
 
 ```sh

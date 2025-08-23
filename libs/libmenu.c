@@ -1,26 +1,32 @@
-#include "libmenuR.h"
+#include "libmenu.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 
 lm_menu *make_menu(
-  char* name,
-  char* version,
-  char** options,
+  char *name,
+  char *version,
+  char **options,
   uint8_t options_l,
-  char* exit_t,
+  char *exit_t,
   bool submenu
 ) {
   lm_menu *ret = (lm_menu*)malloc(sizeof(lm_menu));
   if (!ret) return NULL;
-  if (!exit_t || !options || options_l == 0) return NULL;
-
+  if (!options || options_l == 0) return NULL;
+  if (!exit_t) {
+    if (!submenu)
+      exit_t = "exit";
+    else
+      exit_t = "go back";
+  }
 
   ret->name = name;
   ret->version = version;
   ret->options = options;
   ret->options_l = options_l;
+  ret->last_selection = 0;
   ret->exit_t = exit_t;
   ret->submenu = submenu;
 

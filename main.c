@@ -1,10 +1,10 @@
-#include "libs/libmenuR.h"
+#include "libs/libmenu.h"
 #include "libs/strutils.h"
 #include "libs/libdraw.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define VERSION "1.3.0"
+#define VERSION "1.3.1"
 
 int main(int argc, str* argv) {
   // anl -> Author Name Length
@@ -84,7 +84,7 @@ int main(int argc, str* argv) {
       // exit
       case 0: {
         clear();
-        b++;
+        b = true; // increment of a boolean expression my ASS
         break;
       }
       // make canvas
@@ -123,7 +123,10 @@ int main(int argc, str* argv) {
         setTime(canvas, time(NULL));
         bool b2 = false;
         char s[20];
-      editpls:
+        char temp[w*2 + 1];
+        memset(temp, '-', w*2);
+        temp[w*2] = 0;
+        editpls:
         while (!b2) {
           for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
@@ -133,7 +136,7 @@ int main(int argc, str* argv) {
             putchar(10);
           }
           printf("\x1b[0m");
-          sep();
+          printf("%s\n", temp);
           get_input(drawing, true);
           switch (drawing->last_selection) {
             // paint pixel
@@ -176,6 +179,7 @@ color number: ");
               scanf("%d", &y1);
               printf("X2 coordinate (1-%d): ", w);
               scanf("%d", &x2);
+              // I'M ABOUT TO WOON
               printf("Y2 coordinate (1-%d): ", h);
               scanf("%d", &y2);
               clear();
@@ -238,7 +242,7 @@ color number: ");
               ignore_previous_input();
               char c = getchar();
               if (c == 'y' || c == 'Y')
-                b2++;
+                b2 = true; // increment of a boolean expression my ASS
               else {
                 clear();
                 break;
@@ -335,12 +339,12 @@ color number: ");
           break;
         }
         /*
-          ██╗███╗   ███╗    ███╗   ██╗ ██████╗ ████████╗    ███████╗ ██████╗ ██████╗ ██████╗ ██╗   ██╗
-          ██║████╗ ████║    ████╗  ██║██╔═══██╗╚══██╔══╝    ██╔════╝██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝
-          ██║██╔████╔██║    ██╔██╗ ██║██║   ██║   ██║       ███████╗██║   ██║██████╔╝██████╔╝ ╚████╔╝
-          ██║██║╚██╔╝██║    ██║╚██╗██║██║   ██║   ██║       ╚════██║██║   ██║██╔══██╗██╔══██╗  ╚██╔╝
-          ██║██║ ╚═╝ ██║    ██║ ╚████║╚██████╔╝   ██║       ███████║╚██████╔╝██║  ██║██║  ██║   ██║
-          ╚═╝╚═╝     ╚═╝    ╚═╝  ╚═══╝ ╚═════╝    ╚═╝       ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
+          ██╗██╗███╗   ███╗    ███╗   ██╗ ██████╗ ████████╗    ███████╗ ██████╗ ██████╗ ██████╗ ██╗   ██╗
+          ██║██║████╗ ████║    ████╗  ██║██╔═══██╗╚══██╔══╝    ██╔════╝██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝
+          ██║╚═╝██╔████╔██║    ██╔██╗ ██║██║   ██║   ██║       ███████╗██║   ██║██████╔╝██████╔╝ ╚████╔╝
+          ██║   ██║╚██╔╝██║    ██║╚██╗██║██║   ██║   ██║       ╚════██║██║   ██║██╔══██╗██╔══██╗  ╚██╔╝
+          ██║   ██║ ╚═╝ ██║    ██║ ╚████║╚██████╔╝   ██║       ███████║╚██████╔╝██║  ██║██║  ██║   ██║
+          ╚═╝   ╚═╝     ╚═╝    ╚═╝  ╚═══╝ ╚═════╝    ╚═╝       ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
         */
         char buf[fl];
         fgets(buf, fl, file);
@@ -413,11 +417,11 @@ color number: ");
         Canvas* canvas = initCanvas(l2, strlen(huh2[0]));
         for (size_t i = 0; i < l2; i++) {
           for (size_t j = 0; j < strlen(huh2[i]); j++)
-            // funnier line
             setPixel(canvas, i, j, huh2[i][j]-'0');
         }
-        goto editpls;
-      done:
+        //goto editpls;
+        // funnier line
+        done:
         editing = false;
         dptrfree((void**)split, l);
         free(huh);

@@ -1,5 +1,5 @@
 # Cdraw
-libdraw made as a TUI program using libmenu-remake (formerly libmenu)
+libdraw made as a TUI program using libmenu
 
 ## TODO
 - [x] document this README like I did with the [ITC](utils/ITC/README.md) and [CTI](utils/CTI/README.md) READMEs (won't do it lmfao)  

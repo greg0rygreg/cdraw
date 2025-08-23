@@ -43,7 +43,7 @@ int main(int argc, str* argv) {
       "info"
     },
     4,
-    "exit",
+    NULL, // as far as I'm concerned this'll work
     false
   );
   if (!menu) {
@@ -70,12 +70,13 @@ int main(int argc, str* argv) {
     unmake_menu(menu);
     return 1;
   }
-  int b = 0;
+  bool b = false;
 
   // do you think it's a good idea to do this?
   // I think it is
   // Menu* menus[] = {menu, drawing};
   // 8/13/25 it's not
+
   clear();
   while (!b) {
     get_input(menu, true);
@@ -120,7 +121,7 @@ int main(int argc, str* argv) {
           break;
         }
         setTime(canvas, time(NULL));
-        int b2 = 0;
+        bool b2 = false;
         char s[20];
       editpls:
         while (!b2) {
@@ -250,9 +251,7 @@ color number: ");
               if (strcmp(aname, "\n") == 0)
                 memcpy(aname, "unknowna", 9);
               aname[strlen(aname) - 1] = 0;
-              str nname = NULL;
-              if (strlen(aname) != 0)
-                strreplace(aname, ';', '_', &nname);
+              str nname = strreplace(aname, ';', '_', NULL);
               // this is actually safe because in libdraw.c
               // I check if if the author is NULL, if it is
               // then don't free it (avoids IOT instruction)

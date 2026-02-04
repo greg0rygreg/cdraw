@@ -4,19 +4,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define VERSION "1.3.1"
+#define VERSION "1.3.2"
 
 int main(int argc, str* argv) {
   // anl -> Author Name Length
-  int anl = 128;
+  int anl = 256;
   // fnl -> File Name Length
   int fnl = 512;
   // fl -> File Length
   int fl = 2048;
   // devmode -> Developer Mode
   bool devmode = false;
-  // psm -> Primitive Saving Mechanism
-  bool psm = false;
+  // osm -> Older Saving Method
+  bool osm = false;
   // editing
   bool editing = false;
   for (int i = 0; i < argc; i++) {
@@ -28,8 +28,8 @@ int main(int argc, str* argv) {
       fl = atoi(argv[i+1]);
     if (strcmp("-dm", argv[i]) == 0)
       devmode = true;
-    if (strcmp("-psm", argv[i]) == 0)
-      psm = true;
+    if (strcmp("-osm", argv[i]) == 0)
+      osm = true;
   }
 
   // I love making my own libs and using them to my advantage
@@ -39,11 +39,10 @@ int main(int argc, str* argv) {
     (str[]){
       "make canvas",
       "view canvas",
-      "edit canvas",
       "info"
     },
-    4,
-    NULL, // as far as I'm concerned this'll work
+    3,
+    NULL, // as far as I'm aware this'll work
     false
   );
   if (!menu) {
@@ -76,6 +75,7 @@ int main(int argc, str* argv) {
   // I think it is
   // Menu* menus[] = {menu, drawing};
   // 8/13/25 it's not
+  // 2/4/26 it really isn't
 
   clear();
   while (!b) {
@@ -103,8 +103,8 @@ int main(int argc, str* argv) {
           sep();
           break;
         }
-        if (h <= 2 && psm) {
-          error("height can't be less than or equal to 2 (disable PSM (Primitive Saving Mechanism) to disable this check)");
+        if (h <= 2 && osm) {
+          error("height can't be less than or equal to 2 (disable osm (Older Saving Method) to skip this check)");
           sep();
           break;
         }
@@ -227,16 +227,31 @@ color number: ");
             case 0: {
               clear();
               /*
-              for my sake: let not those that seek thee be confounded for my sake, O
-              God of Israel.
-              
-              69:7 Because for thy sake I have borne reproach; shame hath covered my
-              face.
-              
-              69:8 I am become a stranger unto my brethren, and an alien unto my
-              mother's children.
-              
-              69:9 For the zeal of thine house hath eaten me up; and the reproaches
+              58641 21:16 For thus hath the LORD said unto me, Within a year, according to
+              58642 the years of an hireling, and all the glory of Kedar shall fail: 21:17
+              58643 And the residue of the number of archers, the mighty men of the
+              58644 children of Kedar, shall be diminished: for the LORD God of Israel
+              58645 hath spoken it.
+              58646
+              58647 22:1 The burden of the valley of vision. What aileth thee now, that
+              58648 thou art wholly gone up to the housetops?  22:2 Thou that art full of
+              58649 stirs, a tumultuous city, joyous city: thy slain men are not slain
+              58650 with the sword, nor dead in battle.
+              58651
+              58652 22:3 All thy rulers are fled together, they are bound by the archers:
+              58653 all that are found in thee are bound together, which have fled from
+              58654 far.
+              58655
+              58656 22:4 Therefore said I, Look away from me; I will weep bitterly, labour
+              58657 not to comfort me, because of the spoiling of the daughter of my
+              58658 people.
+              58659
+              58660 22:5 For it is a day of trouble, and of treading down, and of
+              58661 perplexity by the Lord GOD of hosts in the valley of vision, breaking
+              58662 down the walls, and of crying to the mountains.
+              58663
+              58664 22:6 And Elam bare the quiver with chariots of men and horsemen, and
+              58665 Kir uncovered the shield.
               */
               printf("are you sure? (y/n) ");
               ignore_previous_input();
@@ -251,12 +266,13 @@ color number: ");
               printf("author name (max. %d characters): ", anl);
               ignore_previous_input();
               fgets(aname, anl, stdin);
-              // some C veteran is gonna tell me this is super unsafe
+              // some C veteran is gonna tell me this is mega unsafe
               if (strcmp(aname, "\n") == 0)
-                memcpy(aname, "unknowna", 9);
-              aname[strlen(aname) - 1] = 0;
+                memcpy(aname, "unknown", 8);
+              else
+                aname[strlen(aname) - 1] = 0;
               str nname = strreplace(aname, ';', '_', NULL);
-              // this is actually safe because in libdraw.c
+              // this is actually safe because in libdraw
               // I check if if the author is NULL, if it is
               // then don't free it (avoids IOT instruction)
               setAuthor(canvas, nname);
@@ -269,7 +285,7 @@ color number: ");
                 break;
               }
               int g = 0;
-              if (!psm) {
+              if (!osm) {
                 // FUCKING FINALLY
                 for (int i = 0; i < h; i++) {
                   char* temp = malloc(w);
@@ -379,58 +395,8 @@ color number: ");
         sep();
         break;
       }
-      // edit canvas
-      case 3: {
-        clear();
-        warning("work in progress");
-        sep();
-        break;
-
-        // actual working part
-        editing = true;
-        char fname[fnl];
-        printf("filename (max. %d characters & defaults to current directory): ", fnl);
-        ignore_previous_input();
-        fgets(fname, fnl, stdin);
-        fname[strlen(fname) - 1] = 0;
-        FILE* file = fopen(fname, "r");
-        clear();
-        if (!file) {
-          error("file doesn't exist");
-          sep();
-          break;
-        }
-        char buf[fl];
-        fgets(buf, fl, file);
-        fclose(file);
-        size_t l = 0;
-        str* split = strsplit(buf, ';', &l);
-        if (strcmp(split[0], "CDC") != 0 || l != 4) {
-          error("file is in the wrong format");
-          sep();
-          dptrfree((void**)split, l);
-          break;
-        }
-        str huh = strdup(split[1]);
-        size_t l2 = 0;
-        str* huh2 = strsplit(huh, '.', &l2);
-        Canvas* canvas = initCanvas(l2, strlen(huh2[0]));
-        for (size_t i = 0; i < l2; i++) {
-          for (size_t j = 0; j < strlen(huh2[i]); j++)
-            setPixel(canvas, i, j, huh2[i][j]-'0');
-        }
-        //goto editpls;
-        // funnier line
-        done:
-        editing = false;
-        dptrfree((void**)split, l);
-        free(huh);
-        dptrfree((void**)huh2, l2);
-        delCanvas(canvas);
-        break;
-      }
       // info
-      case 4: {
+      case 3: {
         clear();
         printf("%s v. %s\nlicensed under MIT license\nmade with love and patience by greg\n", menu->name, menu->version);
         sep();
@@ -450,5 +416,6 @@ color number: ");
   return 0;
 }
 
+// funnier line
 // that's all folks
 // to compile, use make

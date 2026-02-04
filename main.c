@@ -65,8 +65,8 @@ int main(int argc, str* argv) {
   );
   if (!drawing) {
     error("allocation for drawing menu failed, exiting");
-    // hehe funny line
     unmake_menu(menu);
+    // hehe funny line
     return 1;
   }
   bool b = false;
@@ -415,6 +415,6 @@ color number: ");
   return 0;
 }
 
-// funnier line
 // that's all folks
 // to compile, use make
+// funnier line

@@ -126,7 +126,6 @@ int main(int argc, str* argv) {
         char temp[w*2 + 1];
         memset(temp, '-', w*2);
         temp[w*2] = 0;
-        editpls:
         while (!b2) {
           for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {

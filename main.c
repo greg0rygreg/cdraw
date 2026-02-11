@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define VERSION "1.3.2"
+#define VERSION "1.3.3"
 
 int main(int argc, str* argv) {
   // anl -> Author Name Length
@@ -270,7 +270,7 @@ color number: ");
                 memcpy(aname, "unknown", 8);
               else
                 aname[strlen(aname) - 1] = 0;
-              str nname = strreplace(aname, ';', '_', NULL);
+              str nname = strreplace(aname, ';', '_');
               // this is actually safe because in libdraw
               // I check if if the author is NULL, if it is
               // then don't free it (avoids IOT instruction)

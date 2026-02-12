@@ -150,12 +150,13 @@ void setTime(struct canvas* c, time_t t) {
 
 char* formatPixel(struct canvas* c, int x, int y) {
   // \x1b[xx;yymzz 14
-  // 8/5/25 it's actually 11 because \x1b is 1 character and not 4
+  // 8/5/25 it's actually 11 because \x1b is 1 character and not 3
   // 8/11/25 i'll leave it at 14 for safety
+  // 2/12/26 FUCK IT WE BALL
   if (c == NULL) return NULL;
   enum PIXEL p = getPixel(c, x, y);
-  char* temp = malloc(14);
-  snprintf(temp, 14, "\x1b[%d;%dm%d%d", p + 30, p + 40, p, p);
+  char* temp = malloc(11);
+  snprintf(temp, 11, "\x1b[%d;%dm%d%d", p + 30, p + 40, p, p);
   return temp;
 }
 

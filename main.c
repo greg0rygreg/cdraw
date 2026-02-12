@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define VERSION "1.3.3"
+#define VERSION "1.4.3"
 
 int main(int argc, str* argv) {
   // anl -> Author Name Length
@@ -54,12 +54,13 @@ int main(int argc, str* argv) {
     "actions:",
     NULL,
     (str[]){
-      "set pixel",
-      "fill an area of pixels",
-      "invert all pixels",
-      "invert an area of pixels"
+      "paint pixel",
+      "fill canvas",
+      "fill area",
+      "invert canvas",
+      "invert area"
     },
-    4,
+    5,
     "save canvas & exit",
     true
   );
@@ -84,7 +85,7 @@ int main(int argc, str* argv) {
       // exit
       case 0: {
         clear();
-        b = true; // increment of a boolean expression my ASS
+        b = true;
         break;
       }
       // make canvas
@@ -164,8 +165,27 @@ color number: ");
               clear();
               break;
             }
-            // fill area
+            // fill canvas
             case 2: {
+              clear();
+              int v;
+              printf("colors:\n\
+  0 = black\n\
+  1 = red\n\
+  2 = green\n\
+  3 = yellow\n\
+  4 = blue\n\
+  5 = magenta\n\
+  6 = cyan\n\
+  7 = white\n\
+color number: ");
+              scanf("%d", &v);
+              fillPixels(canvas, 1, 1, w, h, v);
+              clear();
+              break;
+            }
+            // fill area
+            case 3: {
               clear();
               int x1;
               int y1;
@@ -197,14 +217,14 @@ color number: ");
               clear();
               break;
             }
-            // invert pixels
-            case 3: {
+            // invert canvas
+            case 4: {
               clear();
               invertPixels(canvas);
               break;
             }
             // invert area
-            case 4: {
+            case 5: {
               clear();
               int x1;
               int y1;
@@ -256,7 +276,7 @@ color number: ");
               ignore_previous_input();
               char c = getchar();
               if (c == 'y' || c == 'Y')
-                b2 = true; // increment of a boolean expression my ASS
+                b2 = true;
               else {
                 clear();
                 break;
@@ -265,7 +285,7 @@ color number: ");
               printf("author name (max. %d characters): ", anl);
               ignore_previous_input();
               fgets(aname, anl, stdin);
-              // some C veteran is gonna tell me this is mega unsafe
+              // some C veteran is gonna tell me this is hyper unsafe
               if (strcmp(aname, "\n") == 0)
                 memcpy(aname, "unknown", 8);
               else
@@ -314,6 +334,7 @@ color number: ");
               if (file == NULL) {
                 warning("file could not be opened - data will be printed");
                 // I'm sorry actually]
+                // 2/12/26 no i'm not
                 printf("CDC;%s;%s;%ld\n", cuh1, canvas->author, canvas->time);
                 sep();
               } else {

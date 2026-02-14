@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define VERSION "1.4.3"
+#define VERSION "1.4.4"
 
 int main(int argc, str* argv) {
   // anl -> Author Name Length
@@ -33,7 +33,7 @@ int main(int argc, str* argv) {
   }
 
   // I love making my own libs and using them to my advantage
-  lm_menu* menu = make_menu(
+  lm_menu* menu = lm_domenu(
     "Cdraw",
     VERSION,
     (str[]){
@@ -46,11 +46,11 @@ int main(int argc, str* argv) {
     false
   );
   if (!menu) {
-    error("allocation for main menu failed, exiting");
+    lm_error("allocation for main menu failed, exiting");
     return 1;
   }
 
-  lm_menu* drawing = make_menu(
+  lm_menu* drawing = lm_domenu(
     "actions:",
     NULL,
     (str[]){
@@ -65,9 +65,9 @@ int main(int argc, str* argv) {
     true
   );
   if (!drawing) {
-    error("allocation for drawing menu failed, exiting");
-    unmake_menu(menu);
+    lm_error("allocation for drawing menu failed, exiting");
     // hehe funny line
+    free(menu);
     return 1;
   }
   bool b = false;
@@ -78,70 +78,71 @@ int main(int argc, str* argv) {
   // 8/13/25 it's not
   // 2/4/26 it really isn't
 
-  clear();
+  lm_clear();
   while (!b) {
-    get_input(menu, true);
+    lm_input(menu, true);
     switch (menu->last_selection) {
       // exit
       case 0: {
-        clear();
+        lm_clear();
         b = true;
         break;
       }
       // make canvas
       case 1: {
-        clear();
+        lm_clear();
         int w;
         int h;
         // yo you guys should try to remake this in HolyC
+        // 2/14/26 no you guys shouldn't
         printf("width: ");
         scanf("%d", &w);
         printf("height: ");
         scanf("%d", &h);
-        clear();
+        lm_clear();
         if (h * w == 0) { // simple
-          error("width/height can't be zero");
-          sep();
+          lm_error("width/height can't be zero");
+          lm_sep();
           break;
         }
         if (h <= 2 && osm) {
-          error("height can't be less than or equal to 2 (disable osm (Older Saving Method) to skip this check)");
-          sep();
+          lm_error("height can't be less than or equal to 2 (disable osm (Older Saving Method) to skip this check)");
+          lm_sep();
           break;
         }
         if ((h >= 15 || w >= 15) && !devmode) {
-          error("width/height can't be equal to or greater than 15 pixels (pass the -dm parameter to skip this check)");
-          sep();
+          lm_error("width/height can't be equal to or greater than 15 pixels (pass the -dm parameter to skip this check)");
+          lm_sep();
           break;
         }
         // I love making my own libs and using them to my advantage
-        Canvas* canvas = initCanvas(h, w);
+        ld_canvas* canvas = ld_docanvas(h, w);
         if (canvas == NULL) {
-          error("failed to allocate canvas - breaking now");
-          sep();
+          lm_error("failed to allocate canvas - breaking now");
+          lm_sep();
           break;
         }
-        setTime(canvas, time(NULL));
+        ld_time(canvas, time(NULL));
         bool b2 = false;
-        char s[20];
-        char temp[w*2 + 1];
-        memset(temp, '-', w*2);
-        temp[w*2] = 0;
+        char s[11]; // pixel buffer
+        char csep[w*2 + 1]; // canvas seperator
+        memset(csep, '-', w*2);
+        csep[w*2] = 0;
         while (!b2) {
           for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-              formatPixelB(canvas, j+1, i+1, s, 20);
+              ld_FPbuf(canvas, j+1, i+1, s);
               printf("%s\x1b[0m", s);
             }
             putchar(10);
           }
           printf("\x1b[0m");
-          printf("%s\n", temp);
-          get_input(drawing, true);
+          printf("%s\n", csep);
+          lm_input(drawing, true);
           switch (drawing->last_selection) {
             // paint pixel
             case 1: {
-              clear();
+              lm_clear();
               int x;
               int y;
               int v;
@@ -149,7 +150,7 @@ int main(int argc, str* argv) {
               scanf("%d", &x);
               printf("Y coordinate (1-%d): ", h);
               scanf("%d", &y);
-              clear();
+              lm_clear();
               printf("colors:\n\
   0 = black\n\
   1 = red\n\
@@ -161,13 +162,13 @@ int main(int argc, str* argv) {
   7 = white\n\
 color number: ");
               scanf("%d", &v);
-              setPixel(canvas, x, y, v);
-              clear();
+              ld_setpixel(canvas, x, y, v);
+              lm_clear();
               break;
             }
             // fill canvas
             case 2: {
-              clear();
+              lm_clear();
               int v;
               printf("colors:\n\
   0 = black\n\
@@ -180,13 +181,13 @@ color number: ");
   7 = white\n\
 color number: ");
               scanf("%d", &v);
-              fillPixels(canvas, 1, 1, w, h, v);
-              clear();
+              ld_fill(canvas, 1, 1, w, h, v);
+              lm_clear();
               break;
             }
             // fill area
             case 3: {
-              clear();
+              lm_clear();
               int x1;
               int y1;
               int x2;
@@ -201,7 +202,7 @@ color number: ");
               // I'M ABOUT TO WOON
               printf("Y2 coordinate (1-%d): ", h);
               scanf("%d", &y2);
-              clear();
+              lm_clear();
               printf("colors:\n\
   0 = black\n\
   1 = red\n\
@@ -213,19 +214,19 @@ color number: ");
   7 = white\n\
 color number: ");
               scanf("%d", &v);
-              fillPixels(canvas, x1, y1, x2, y2, v);
-              clear();
+              ld_fill(canvas, x1, y1, x2, y2, v);
+              lm_clear();
               break;
             }
             // invert canvas
             case 4: {
-              clear();
-              invertPixels(canvas);
+              lm_clear();
+              ld_invertall(canvas);
               break;
             }
             // invert area
             case 5: {
-              clear();
+              lm_clear();
               int x1;
               int y1;
               int x2;
@@ -238,13 +239,13 @@ color number: ");
               scanf("%d", &x2);
               printf("Y2 coordinate (1-%d): ", h);
               scanf("%d", &y2);
-              clear();
-              invertArea(canvas, x1, y1, x2, y2);
+              lm_clear();
+              ld_invert(canvas, x1, y1, x2, y2);
               break;
             }
             // exit
             case 0: {
-              clear();
+              lm_clear();
               /*
               58641 21:16 For thus hath the LORD said unto me, Within a year, according to
               58642 the years of an hireling, and all the glory of Kedar shall fail: 21:17
@@ -273,17 +274,17 @@ color number: ");
               58665 Kir uncovered the shield.
               */
               printf("are you sure? (y/n) ");
-              ignore_previous_input();
+              lm_noprevinput();
               char c = getchar();
               if (c == 'y' || c == 'Y')
                 b2 = true;
               else {
-                clear();
+                lm_clear();
                 break;
               }
               char aname[anl];
               printf("author name (max. %d characters): ", anl);
-              ignore_previous_input();
+              lm_noprevinput();
               fgets(aname, anl, stdin);
               // some C veteran is gonna tell me this is hyper unsafe
               if (strcmp(aname, "\n") == 0)
@@ -294,13 +295,13 @@ color number: ");
               // this is actually safe because in libdraw
               // I check if if the author is NULL, if it is
               // then don't free it (avoids IOT instruction)
-              setAuthor(canvas, nname);
+              ld_author(canvas, nname);
               str cuh1 = malloc(h * w + h + 1);
               if (cuh1 == NULL) {
-                clear();
+                lm_clear();
                 // truly heartbreaking
-                error("generating output canvas failed - your artwork has NOT been saved...");
-                sep();
+                lm_error("generating output canvas failed - your artwork has NOT been saved...");
+                lm_sep();
                 break;
               }
               int g = 0;
@@ -319,7 +320,7 @@ color number: ");
               } else {
                 for (int i = 0; i < h; i++) {
                   for (int j = 0; j < w; j++)
-                    cuh1[g++] = getPixel(canvas, j+1, i+1) + 48;
+                    cuh1[g++] = ld_getpixel(canvas, j+1, i+1) + 48;
                   if (i < h - 1)
                     cuh1[g++] = '.';
                 }
@@ -329,20 +330,20 @@ color number: ");
               printf("filename (max. %d characters & defaults to current directory): ", fnl);
               fgets(fname, fnl, stdin);
               fname[strlen(fname) - 1] = 0;
-              clear();
+              lm_clear();
               FILE* file = fopen(fname, "w");
               if (file == NULL) {
-                warning("file could not be opened - data will be printed");
+                lm_warn("file could not be opened - data will be printed");
                 // I'm sorry actually]
                 // 2/12/26 no i'm not
                 printf("CDC;%s;%s;%ld\n", cuh1, canvas->author, canvas->time);
-                sep();
+                lm_sep();
               } else {
                 fprintf(file, "CDC;%s;%s;%ld", cuh1, canvas->author, canvas->time);
                 fclose(file);
               }
               if (!editing){
-                delCanvas(canvas);
+                ld_uncanvas(canvas);
                 free(cuh1);
               } else {
               }
@@ -350,9 +351,9 @@ color number: ");
             }
             // fallback
             default: {
-              clear();
-              error("no option made for selection %d", drawing->last_selection);
-              sep();
+              lm_clear();
+              lm_error("no option made for selection %d", drawing->last_selection);
+              lm_sep();
               break;
             }
           }
@@ -361,17 +362,21 @@ color number: ");
       }
       // view canvas
       case 2: {
-        clear();
+        // TODO use strtok from string.h and not strsplit from strutils.h
+        // cuz strsplit's HELLLLAAAAAAAAAA slow
+        // just reading examples/dong.cdc makes this thing allocate other
+        // things 54ish times (atleast there are no memory leaks)
+        lm_clear();
         char fname[fnl];
         printf("filename (max. %d characters & defaults to current directory): ", fnl);
-        ignore_previous_input();
+        lm_noprevinput();
         fgets(fname, fnl, stdin);
         fname[strlen(fname) - 1] = 0;
         FILE* file = fopen(fname, "r");
-        clear();
+        lm_clear();
         if (!file) {
-          error("file doesn't exist");
-          sep();
+          lm_error("file doesn't exist");
+          lm_sep();
           break;
         }
         /*
@@ -387,8 +392,8 @@ color number: ");
         size_t l = 0;
         str* split = strsplit(buf, ';', &l);
         if (strcmp(split[0], "CDC") != 0 || l != 4) {
-          error("file is in the wrong format");
-          sep();
+          lm_error("file is in the wrong format");
+          lm_sep();
           fclose(file);
           dptrfree((void**)split, l);
           break;
@@ -412,30 +417,30 @@ color number: ");
         dptrfree((void**)split, l);
         free(canvas);
         fclose(file);
-        sep();
+        // funnier line
+        lm_sep();
         break;
       }
       // info
       case 3: {
-        clear();
+        lm_clear();
         printf("%s v. %s\nlicensed under MIT license\nmade with love and patience by greg\n", menu->name, menu->version);
-        sep();
+        lm_sep();
         break;
       }
       // fallback
       default: {
-        clear();
-        error("no option made for selection %d", menu->last_selection);
-        sep();
+        lm_clear();
+        lm_error("no option made for selection %d", menu->last_selection);
+        lm_sep();
         break;
       }
     }
   }
-  unmake_menu(menu);
-  unmake_menu(drawing);
+  free(menu);
+  free(drawing);
   return 0;
 }
 
 // that's all folks
-// to compile, use make
-// funnier line
+// gcc -o main main.c libs/*.c

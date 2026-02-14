@@ -4,43 +4,50 @@
 #include <stdbool.h>
 
 typedef struct lm_menu {
+  char **options;
   char *name;
   char *version;
-  char **options;
-  uint8_t options_l;
-  uint8_t last_selection;
   char *exit_t;
   bool submenu;
+  int options_l;
+  int last_selection;
 } lm_menu;
 
-lm_menu *make_menu(
+// create a menu
+lm_menu *lm_domenu(
   char *name,
   char *version,
   char **options,
-  uint8_t options_l,
+  int options_l,
   char *exit_t,
   bool submenu
 );
 
-void get_input(
+// get input from user,
+// outputting it to `menu->last_selection`
+void lm_input(
   lm_menu *menu,
   bool include_name
 );
 
-void unmake_menu(
-  lm_menu *menu
-);
+// print a seperator
+void lm_sep();
 
-void sep();
-void clear();
-void ignore_previous_input();
+// clear the screen
+void lm_clear();
 
-void error(
+// avoid using last input,
+// making `fgets` useless
+void lm_noprevinput();
+
+// print a fancy error
+void lm_error(
   char *info,
   ...
 );
 
-void warning(
+// print a fancy warning
+void lm_warn(
   char *info,
   ...
 );

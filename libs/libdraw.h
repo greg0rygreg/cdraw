@@ -7,15 +7,15 @@
 extern "C" {
 #endif
 
-typedef struct canvas {
-  int height;
-  int width;
+typedef struct ld_canvas {
   char** pixels;
   char* author;
   time_t time;
-} Canvas;
+  int height;
+  int width;
+} ld_canvas;
 
-enum PIXEL {
+typedef enum pixel {
   BLACK,
   RED,
   GREEN,
@@ -25,44 +25,45 @@ enum PIXEL {
   CYAN,
   WHITE,
   UNKNOWN
-};
+} pixel;
 
 // initialize a libdraw canvas
-struct canvas* initCanvas(int h, int w);
+ld_canvas* ld_docanvas(int h, int w);
 
 // delete a libdraw canvas
-void delCanvas(struct canvas* c);
+void ld_uncanvas(ld_canvas* c);
 
 // set the author of a certain canvas to a certain name
-void setAuthor(struct canvas* c, char* a);
+void ld_author(ld_canvas* c, char* a);
 
 // clamp a pixel (from BLACK to WHITE)
-enum PIXEL clampPixel(enum PIXEL c);
+pixel ld_clamp(pixel c);
+
 // format a pixel
-char* formatPixel(struct canvas* c, int x, int y);
+char* ld_fmtpixel(ld_canvas* c, int x, int y);
 
 // set the time of a certain canvas to a certain UNIX timestamp
 // (defines creation time)
-void setTime(struct canvas* c, time_t t);
+void ld_time(ld_canvas* c, time_t t);
 
 // get a certain pixel from a certain canvas at a certain coordinate
-enum PIXEL getPixel(struct canvas* c, int x, int y);
+pixel ld_getpixel(ld_canvas* c, int x, int y);
 
 // set a certain pixel from a certain canvas at a certain coordinate
-// to a certain `enum PIXEL` value
-void setPixel(struct canvas* c, int x, int y, enum PIXEL v);
+// to a certain `enum pixel` value
+void ld_setpixel(ld_canvas* c, int x, int y, pixel v);
 
 // fill a certain area of a certain canvas with a certain color
-void fillPixels(Canvas* c, int x1, int y1, int x2, int y2, enum PIXEL v);
+void ld_fill(ld_canvas* c, int x1, int y1, int x2, int y2, pixel v);
 
 // format a pixel, but print it to `buffer`
-void formatPixelB(Canvas* c, int x, int y, char* buffer, size_t len);
+void ld_FPbuf(ld_canvas* c, int x, int y, char* buffer);
 
 // invert the colors of every pixel in a certain canvas
-void invertPixels(struct canvas* c);
+void ld_invertall(ld_canvas* c);
 
 // invert the colors of a certain area in a certain canvas
-void invertArea(Canvas* c, int x1, int y1, int x2, int y2);
+void ld_invert(ld_canvas* c, int x1, int y1, int x2, int y2);
 
 #ifdef __cplusplus
 }

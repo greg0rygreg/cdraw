@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#define VERSION "1.4.4"
+#include <time.h>
 
 int main(int argc, str* argv) {
   // anl -> Author Name Length
@@ -15,10 +15,6 @@ int main(int argc, str* argv) {
   int fl = 2048;
   // devmode -> Developer Mode
   bool devmode = false;
-  // osm -> Older Saving Method
-  bool osm = false;
-  // editing
-  bool editing = false;
   for (int i = 0; i < argc; i++) {
     if (strcmp("-anl", argv[i]) == 0)
       anl = atoi(argv[i+1]);
@@ -28,14 +24,12 @@ int main(int argc, str* argv) {
       fl = atoi(argv[i+1]);
     if (strcmp("-dm", argv[i]) == 0)
       devmode = true;
-    if (strcmp("-osm", argv[i]) == 0)
-      osm = true;
   }
 
   // I love making my own libs and using them to my advantage
   lm_menu* menu = lm_domenu(
     "Cdraw",
-    VERSION,
+    "1.5.4",
     (str[]){
       "make canvas",
       "view canvas",
@@ -66,19 +60,13 @@ int main(int argc, str* argv) {
   );
   if (!drawing) {
     lm_error("allocation for drawing menu failed, exiting");
-    // hehe funny line
     free(menu);
     return 1;
   }
   bool b = false;
 
-  // do you think it's a good idea to do this?
-  // I think it is
-  // Menu* menus[] = {menu, drawing};
-  // 8/13/25 it's not
-  // 2/4/26 it really isn't
-
   lm_clear();
+  // hehe funny line
   while (!b) {
     lm_input(menu, true);
     switch (menu->last_selection) {
@@ -102,11 +90,6 @@ int main(int argc, str* argv) {
         lm_clear();
         if (h * w == 0) { // simple
           lm_error("width/height can't be zero");
-          lm_sep();
-          break;
-        }
-        if (h <= 2 && osm) {
-          lm_error("height can't be less than or equal to 2 (disable osm (Older Saving Method) to skip this check)");
           lm_sep();
           break;
         }
@@ -305,25 +288,15 @@ color number: ");
                 break;
               }
               int g = 0;
-              if (!osm) {
-                // FUCKING FINALLY
-                for (int i = 0; i < h; i++) {
-                  char* temp = malloc(w);
-                  for (int j = 0; j < w; j++)
-                    temp[j] = canvas->pixels[i][j] + 48;
-                  memcpy(&cuh1[g], temp, w);
-                  free(temp);
-                  g += w;
-                  if (i < h - 1)
-                    cuh1[g++] = '.';
-                }
-              } else {
-                for (int i = 0; i < h; i++) {
-                  for (int j = 0; j < w; j++)
-                    cuh1[g++] = ld_getpixel(canvas, j+1, i+1) + 48;
-                  if (i < h - 1)
-                    cuh1[g++] = '.';
-                }
+              for (int i = 0; i < h; i++) {
+                char* temp = malloc(w);
+                for (int j = 0; j < w; j++)
+                  temp[j] = canvas->pixels[i][j] + 48;
+                memcpy(&cuh1[g], temp, w);
+                free(temp);
+                g += w;
+                if (i < h - 1)
+                  cuh1[g++] = '.';
               }
               cuh1[g] = 0;
               char fname[fnl];
@@ -342,11 +315,8 @@ color number: ");
                 fprintf(file, "CDC;%s;%s;%ld", cuh1, canvas->author, canvas->time);
                 fclose(file);
               }
-              if (!editing){
-                ld_uncanvas(canvas);
-                free(cuh1);
-              } else {
-              }
+              ld_uncanvas(canvas);
+              free(cuh1);
               break;
             }
             // fallback
@@ -366,6 +336,8 @@ color number: ");
         // cuz strsplit's HELLLLAAAAAAAAAA slow
         // just reading examples/dong.cdc makes this thing allocate other
         // things 54ish times (atleast there are no memory leaks)
+        // 15/2/26 done. From 54ish allocs -> 32 allocs, no memory leaks
+        // too!
         lm_clear();
         char fname[fnl];
         printf("filename (max. %d characters & defaults to current directory): ", fnl);
@@ -389,33 +361,61 @@ color number: ");
         */
         char buf[fl];
         fgets(buf, fl, file);
-        size_t l = 0;
-        str* split = strsplit(buf, ';', &l);
-        if (strcmp(split[0], "CDC") != 0 || l != 4) {
+        if (strcount(buf, ';') != 3) {
           lm_error("file is in the wrong format");
-          lm_sep();
+          // funnier line
           fclose(file);
-          dptrfree((void**)split, l);
+          lm_sep();
           break;
         }
-        time_t _time = atoi(split[3]);
-        struct tm* times = localtime(&_time);
-        char tb[30];
-        str canvas = strdup(split[1]);
-        strftime(tb, 30, "%m/%d/%Y @ %H:%M:%S", times);
-        printf("who: %s\nwhen: %s\n\n", split[2], tb);
-        for (size_t i = 0; i < strlen(canvas); i++) {
-          if (canvas[i] != '.')
-            // found the problem
-            // I was casting char to int which caused, let's say, a 0, to turn into 48
-            printf("\x1b[%d;%dm%c%c", (canvas[i]-'0') + 30, (canvas[i]-'0') + 40, canvas[i], canvas[i]);
+        str buftok = strtok(buf, ";");
+        int i = 0;
+        str type, cdata, author;
+        time_t time;
+        while (buftok) {
+          switch (i) {
+            case 0: {
+              type = buftok;
+              break;
+            }
+            case 1: {
+              cdata = buftok;
+              break;
+            }
+            case 2: {
+              author = buftok;
+              break;
+            }
+            case 3: {
+              time = atoi(buftok);
+              break;
+            }
+          }
+          buftok = strtok(NULL, ";");
+          i++;
+        }
+        if (strncmp(type, "CDC", 3) != 0) {
+          lm_error("file is in the wrong format");
+          fclose(file);
+          lm_sep();
+          break;
+        }
+        str timefmt = ctime(&time);
+        printf("who: %s\nwhen: %s\n", author, timefmt);
+        for (int i = 0; cdata[i]; i++) {
+          char cur = cdata[i]; // cdata is hard to type fast, ok?
+          if (cdata[i] != '.')
+            printf(
+              "\x1b[%d;%dm%d",
+              (cur-'0')+30,
+              (cur-'0')+40,
+              (cur-'0')*11
+            );
           else
             putchar(10);
         }
         printf("\x1b[0m\n");
-        if (devmode) printf("%s\n", canvas);
-        dptrfree((void**)split, l);
-        free(canvas);
+        if (devmode) printf("%s;%s;%s;%lu\n", type, cdata, author, time);
         fclose(file);
         // funnier line
         lm_sep();

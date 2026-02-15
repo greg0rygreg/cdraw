@@ -363,7 +363,6 @@ color number: ");
         fgets(buf, fl, file);
         if (strcount(buf, ';') != 3) {
           lm_error("file is in the wrong format");
-          // funnier line
           fclose(file);
           lm_sep();
           break;
@@ -417,8 +416,8 @@ color number: ");
         printf("\x1b[0m\n");
         if (devmode) printf("%s;%s;%s;%lu\n", type, cdata, author, time);
         fclose(file);
-        // funnier line
         lm_sep();
+        // funnier line
         break;
       }
       // info

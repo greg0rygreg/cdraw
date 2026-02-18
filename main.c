@@ -289,11 +289,10 @@ color number: ");
               }
               int g = 0;
               for (int i = 0; i < h; i++) {
-                char* temp = malloc(w);
+                char temp[w];
                 for (int j = 0; j < w; j++)
                   temp[j] = canvas->pixels[i][j] + 48;
                 memcpy(&cuh1[g], temp, w);
-                free(temp);
                 g += w;
                 if (i < h - 1)
                   cuh1[g++] = '.';
@@ -332,12 +331,6 @@ color number: ");
       }
       // view canvas
       case 2: {
-        // TODO use strtok from string.h and not strsplit from strutils.h
-        // cuz strsplit's HELLLLAAAAAAAAAA slow
-        // just reading examples/dong.cdc makes this thing allocate other
-        // things 54ish times (atleast there are no memory leaks)
-        // 15/2/26 done. From 54ish allocs -> 32 allocs, no memory leaks
-        // too!
         lm_clear();
         char fname[fnl];
         printf("filename (max. %d characters & defaults to current directory): ", fnl);
@@ -369,41 +362,25 @@ color number: ");
         }
         str buftok = strtok(buf, ";");
         int i = 0;
-        str type, cdata, author;
+        str data[3];
         time_t time;
         while (buftok) {
-          switch (i) {
-            case 0: {
-              type = buftok;
-              break;
-            }
-            case 1: {
-              cdata = buftok;
-              break;
-            }
-            case 2: {
-              author = buftok;
-              break;
-            }
-            case 3: {
-              time = atoi(buftok);
-              break;
-            }
-          }
+          if (i != 3) data[i] = buftok;
+          else time = atoi(buftok);
           buftok = strtok(NULL, ";");
           i++;
         }
-        if (strncmp(type, "CDC", 3) != 0) {
+        if (strncmp(data[0], "CDC", 3) != 0) {
           lm_error("file is in the wrong format");
           fclose(file);
           lm_sep();
           break;
         }
         str timefmt = ctime(&time);
-        printf("who: %s\nwhen: %s\n", author, timefmt);
-        for (int i = 0; cdata[i]; i++) {
-          char cur = cdata[i]; // cdata is hard to type fast, ok?
-          if (cdata[i] != '.')
+        printf("who: %s\nwhen: %s\n", data[2], timefmt);
+        for (int i = 0; data[1][i]; i++) {
+          char cur = data[1][i];
+          if (cur != '.')
             printf(
               "\x1b[%d;%dm%d",
               (cur-'0')+30,
@@ -414,10 +391,11 @@ color number: ");
             putchar(10);
         }
         printf("\x1b[0m\n");
-        if (devmode) printf("%s;%s;%s;%lu\n", type, cdata, author, time);
+        str tmp = strjoin(data, 3, ';');
+        if (devmode) printf("%s;%lu\n", tmp, time);
+        free(tmp);
         fclose(file);
         lm_sep();
-        // funnier line
         break;
       }
       // info
@@ -439,6 +417,7 @@ color number: ");
   free(menu);
   free(drawing);
   return 0;
+  // funnier line
 }
 
 // that's all folks

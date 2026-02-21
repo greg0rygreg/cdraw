@@ -382,18 +382,17 @@ color number: ");
           char cur = data[1][i];
           if (cur != '.')
             printf(
-              "\x1b[%d;%dm%d",
+              "\x1b[%d;%dm%d%d",
               (cur-'0')+30,
               (cur-'0')+40,
-              (cur-'0')*11
+              (cur-'0'),
+              (cur-'0')
             );
           else
             putchar(10);
         }
         printf("\x1b[0m\n");
-        str tmp = strjoin(data, 3, ';');
-        if (devmode) printf("%s;%lu\n", tmp, time);
-        free(tmp);
+        if (devmode) printf("%s;%s;%s;%lu\n", data[0], data[1], data[2], time);
         fclose(file);
         lm_sep();
         break;

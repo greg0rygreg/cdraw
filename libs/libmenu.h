@@ -37,7 +37,7 @@ void lm_sep();
 void lm_clear();
 
 // avoid using last input,
-// making `fgets` useless
+// to also avoid making `fgets` useless
 void lm_noprevinput();
 
 // print a fancy error

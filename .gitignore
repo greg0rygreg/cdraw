@@ -1,4 +1,4 @@
-*.cdc
+./*.cdc
 main
 utils/CTI/out/test.bmp
 utils/CTI/test.cdc

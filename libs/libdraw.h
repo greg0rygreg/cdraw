@@ -7,14 +7,6 @@
 extern "C" {
 #endif
 
-typedef struct ld_canvas {
-  char** pixels;
-  char* author;
-  time_t time;
-  int height;
-  int width;
-} ld_canvas;
-
 typedef enum pixel {
   BLACK,
   RED,
@@ -27,6 +19,14 @@ typedef enum pixel {
   UNKNOWN
 } pixel;
 
+typedef struct ld_canvas {
+  char* author;
+  pixel* pixels;
+  time_t time;
+  int width;
+  int height;
+} ld_canvas;
+
 // initialize a libdraw canvas
 ld_canvas* ld_docanvas(int h, int w);
 
@@ -35,9 +35,6 @@ void ld_uncanvas(ld_canvas* c);
 
 // set the author of a certain canvas to a certain name
 void ld_author(ld_canvas* c, char* a);
-
-// clamp a pixel (from BLACK to WHITE)
-pixel ld_clamp(pixel c);
 
 // format a pixel
 char* ld_fmtpixel(ld_canvas* c, int x, int y);

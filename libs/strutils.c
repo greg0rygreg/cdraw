@@ -1,6 +1,7 @@
 #include "strutils.h"
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 str* strsplit(str s, char d, size_t* lr) {
@@ -47,28 +48,26 @@ str strreverse(str s) {
 
 // God help me
 str strjoin(str* sa, size_t sal, char d) {
-  size_t toalloc = 0;
+  if (!sa || sal < 1) return NULL;
+  size_t n = 0;
   for (size_t i = 0; i < sal; i++)
-    toalloc += strlen(sa[i]);
-  toalloc += sal - 1 + 1;
-  str temp = malloc(toalloc);
-  if (!temp) return NULL;
-  size_t pos = 0;
+    n += strlen(sa[i]);
+  n += sal;
+  str ret = malloc(n);
+  if (!ret) return NULL;
+  //ret[0] = 0;
   for (size_t i = 0; i < sal; i++) {
-    size_t len = strlen(sa[i]);
-    memcpy(&temp[pos], sa[i], len);
-    pos += len;
-    if (i < sal - 1)
-      temp[pos++] = d;
+    if (i != 0)
+      snprintf(ret + strlen(ret), strlen(sa[i])+2, "%c%s", d, sa[i]);
+    else
+      snprintf(ret + strlen(ret), strlen(sa[i])+2, "%s", sa[i]);
   }
-  temp[pos] = '\0';
-  return temp;
+  return ret;
 }
 
 int strhas(str s, char c) {
-  for (size_t i = 0; s[i]; i++) {
+  for (size_t i = 0; s[i]; i++)
     if (s[i] == c) return 1;
-  }
   return 0;
 }
 

@@ -291,7 +291,7 @@ color number: ");
               for (int i = 0; i < h; i++) {
                 char temp[w];
                 for (int j = 0; j < w; j++)
-                  temp[j] = canvas->pixels[i][j] + 48;
+                  temp[j] = canvas->pixels[w * i + j] + 48;
                 memcpy(&cuh1[g], temp, w);
                 g += w;
                 if (i < h - 1)
@@ -416,8 +416,8 @@ color number: ");
   free(menu);
   free(drawing);
   return 0;
-  // funnier line
 }
+// funnier line
 
 // that's all folks
 // gcc -o main main.c libs/*.c

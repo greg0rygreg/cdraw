@@ -29,7 +29,7 @@ int main(int argc, str* argv) {
   // I love making my own libs and using them to my advantage
   lm_menu* menu = lm_domenu(
     "Cdraw",
-    "1.5.4",
+    "1.5.5",
     (str[]){
       "make canvas",
       "view canvas",
@@ -44,20 +44,40 @@ int main(int argc, str* argv) {
     return 1;
   }
 
-  lm_menu* drawing = lm_domenu(
-    "actions:",
-    NULL,
-    (str[]){
-      "paint pixel",
-      "fill canvas",
-      "fill area",
-      "invert canvas",
-      "invert area"
-    },
-    5,
-    "save canvas & exit",
-    true
-  );
+  bool blindpaintreferenceholymoly = 0;
+  lm_menu* drawing;
+  if (devmode)
+    drawing = lm_domenu(
+      "actions:",
+      NULL,
+      (str[]){
+        "paint pixel",
+        "fill canvas",
+        "fill area",
+        "invert canvas",
+        "invert area",
+        "toggle blind mode"
+      },
+      6,
+      "save canvas & exit",
+      true
+    );
+  else
+    drawing = lm_domenu(
+      "actions:",
+      NULL,
+      // hehe funny line
+      (str[]){
+        "paint pixel",
+        "fill canvas",
+        "fill area",
+        "invert canvas",
+        "invert area"
+      },
+      5,
+      "save canvas & exit",
+      true
+    );
   if (!drawing) {
     lm_error("allocation for drawing menu failed, exiting");
     free(menu);
@@ -66,7 +86,6 @@ int main(int argc, str* argv) {
   bool b = false;
 
   lm_clear();
-  // hehe funny line
   while (!b) {
     lm_input(menu, true);
     switch (menu->last_selection) {
@@ -93,11 +112,6 @@ int main(int argc, str* argv) {
           lm_sep();
           break;
         }
-        if ((h >= 15 || w >= 15) && !devmode) {
-          lm_error("width/height can't be equal to or greater than 15 pixels (pass the -dm parameter to skip this check)");
-          lm_sep();
-          break;
-        }
         // I love making my own libs and using them to my advantage
         ld_canvas* canvas = ld_docanvas(h, w);
         if (canvas == NULL) {
@@ -112,15 +126,17 @@ int main(int argc, str* argv) {
         memset(csep, '-', w*2);
         csep[w*2] = 0;
         while (!b2) {
-          for (int i = 0; i < h; i++) {
-            for (int j = 0; j < w; j++) {
-              ld_FPbuf(canvas, j+1, i+1, s);
-              printf("%s\x1b[0m", s);
+          if (!blindpaintreferenceholymoly) {
+            for (int i = 0; i < h; i++) {
+              for (int j = 0; j < w; j++) {
+                ld_FPbuf(canvas, j+1, i+1, s);
+                printf("%s\x1b[0m", s);
+              }
+              putchar(10);
             }
-            putchar(10);
+            printf("\x1b[0m");
+            printf("%s\n", csep);
           }
-          printf("\x1b[0m");
-          printf("%s\n", csep);
           lm_input(drawing, true);
           switch (drawing->last_selection) {
             // paint pixel
@@ -226,6 +242,16 @@ color number: ");
               ld_invert(canvas, x1, y1, x2, y2);
               break;
             }
+            case 6: {
+              lm_clear();
+              if (devmode)
+                blindpaintreferenceholymoly = !blindpaintreferenceholymoly;
+              else {
+                lm_error("no option made for selection %d", drawing->last_selection);
+                lm_sep();
+              }
+              break;
+            }
             // exit
             case 0: {
               lm_clear();
@@ -288,8 +314,8 @@ color number: ");
                 break;
               }
               int g = 0;
+              char temp[w];
               for (int i = 0; i < h; i++) {
-                char temp[w];
                 for (int j = 0; j < w; j++)
                   temp[j] = canvas->pixels[w * i + j] + 48;
                 memcpy(&cuh1[g], temp, w);
@@ -386,6 +412,7 @@ color number: ");
               (cur-'0')+30,
               (cur-'0')+40,
               (cur-'0'),
+              // funnier line
               (cur-'0')
             );
           else
@@ -417,7 +444,6 @@ color number: ");
   free(drawing);
   return 0;
 }
-// funnier line
 
 // that's all folks
 // gcc -o main main.c libs/*.c

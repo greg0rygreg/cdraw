@@ -10,7 +10,7 @@ typedef struct lm_menu {
   char *exit_t;
   bool submenu;
   int options_l;
-  int last_selection;
+  int last;
 } lm_menu;
 
 // create a menu

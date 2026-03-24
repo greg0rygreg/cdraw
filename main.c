@@ -1,10 +1,10 @@
+// do you see a strsplit in here? I friggin don't
 #include "libs/libmenu.h"
 #include "libs/strutils.h"
 #include "libs/libdraw.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <time.h>
 
 int main(int argc, str* argv) {
   // anl -> Author Name Length
@@ -29,7 +29,7 @@ int main(int argc, str* argv) {
   // I love making my own libs and using them to my advantage
   lm_menu* menu = lm_domenu(
     "Cdraw",
-    "1.5.5",
+    "1.6.0-rc1",
     (str[]){
       "make canvas",
       "view canvas",
@@ -44,51 +44,32 @@ int main(int argc, str* argv) {
     return 1;
   }
 
-  bool blindpaintreferenceholymoly = 0;
-  lm_menu* drawing;
-  if (devmode)
-    drawing = lm_domenu(
-      "actions:",
-      NULL,
-      (str[]){
-        "paint pixel",
-        "fill canvas",
-        "fill area",
-        "invert canvas",
-        "invert area",
-        "toggle blind mode"
-      },
-      6,
-      "save canvas & exit",
-      true
-    );
-  else
-    drawing = lm_domenu(
-      "actions:",
-      NULL,
-      // hehe funny line
-      (str[]){
-        "paint pixel",
-        "fill canvas",
-        "fill area",
-        "invert canvas",
-        "invert area"
-      },
-      5,
-      "save canvas & exit",
-      true
-    );
+  lm_menu* drawing = lm_domenu(
+    "actions:",
+    NULL,
+    (str[]){
+      "paint pixel",
+      "fill canvas",
+      "fill area",
+      "invert canvas",
+      "invert area"
+    },
+    5,
+    "save canvas & exit",
+    true
+  );
+    
   if (!drawing) {
     lm_error("allocation for drawing menu failed, exiting");
     free(menu);
     return 1;
   }
   bool b = false;
-
   lm_clear();
+  // hehe funny line
   while (!b) {
     lm_input(menu, true);
-    switch (menu->last_selection) {
+    switch (menu->last) {
       // exit
       case 0: {
         lm_clear();
@@ -98,8 +79,7 @@ int main(int argc, str* argv) {
       // make canvas
       case 1: {
         lm_clear();
-        int w;
-        int h;
+        int w, h;
         // yo you guys should try to remake this in HolyC
         // 2/14/26 no you guys shouldn't
         printf("width: ");
@@ -107,15 +87,15 @@ int main(int argc, str* argv) {
         printf("height: ");
         scanf("%d", &h);
         lm_clear();
-        if (h * w == 0) { // simple
-          lm_error("width/height can't be zero");
+        if (h*w == 0) { // simple
+          lm_error("area can't be zero");
           lm_sep();
           break;
         }
         // I love making my own libs and using them to my advantage
         ld_canvas* canvas = ld_docanvas(h, w);
-        if (canvas == NULL) {
-          lm_error("failed to allocate canvas - breaking now");
+        if (!canvas) {
+          lm_error("failed to allocate canvas - stopping now");
           lm_sep();
           break;
         }
@@ -126,25 +106,21 @@ int main(int argc, str* argv) {
         memset(csep, '-', w*2);
         csep[w*2] = 0;
         while (!b2) {
-          if (!blindpaintreferenceholymoly) {
-            for (int i = 0; i < h; i++) {
-              for (int j = 0; j < w; j++) {
-                ld_FPbuf(canvas, j+1, i+1, s);
-                printf("%s\x1b[0m", s);
-              }
-              putchar(10);
+          for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+              ld_FPbuf(canvas, j+1, i+1, s);
+              printf("%s\x1b[0m", s);
             }
+            putchar(10);
+          }
             printf("\x1b[0m");
             printf("%s\n", csep);
-          }
           lm_input(drawing, true);
-          switch (drawing->last_selection) {
+          switch (drawing->last) {
             // paint pixel
             case 1: {
               lm_clear();
-              int x;
-              int y;
-              int v;
+              int x, y, v;
               printf("X coordinate (1-%d): ", w);
               scanf("%d", &x);
               printf("Y coordinate (1-%d): ", h);
@@ -187,11 +163,7 @@ color number: ");
             // fill area
             case 3: {
               lm_clear();
-              int x1;
-              int y1;
-              int x2;
-              int y2;
-              int v;
+              int x1, y1, x2, y2, v;
               printf("X1 coordinate (1-%d): ", w);
               scanf("%d", &x1);
               printf("Y1 coordinate (1-%d): ", h);
@@ -226,10 +198,7 @@ color number: ");
             // invert area
             case 5: {
               lm_clear();
-              int x1;
-              int y1;
-              int x2;
-              int y2;
+              int x1, y1, x2, y2;
               printf("X1 coordinate (1-%d): ", w);
               scanf("%d", &x1);
               printf("Y1 coordinate (1-%d): ", h);
@@ -240,16 +209,6 @@ color number: ");
               scanf("%d", &y2);
               lm_clear();
               ld_invert(canvas, x1, y1, x2, y2);
-              break;
-            }
-            case 6: {
-              lm_clear();
-              if (devmode)
-                blindpaintreferenceholymoly = !blindpaintreferenceholymoly;
-              else {
-                lm_error("no option made for selection %d", drawing->last_selection);
-                lm_sep();
-              }
               break;
             }
             // exit
@@ -282,7 +241,7 @@ color number: ");
               58664 22:6 And Elam bare the quiver with chariots of men and horsemen, and
               58665 Kir uncovered the shield.
               */
-              printf("are you sure? (y/n) ");
+              printf("are you sure? (y/[n]) ");
               lm_noprevinput();
               char c = getchar();
               if (c == 'y' || c == 'Y')
@@ -295,14 +254,15 @@ color number: ");
               printf("author name (max. %d characters): ", anl);
               lm_noprevinput();
               fgets(aname, anl, stdin);
-              // some C veteran is gonna tell me this is hyper unsafe
+              // some C veteran is gonna tell me this is ultra unsafe
+              // 3/24/26 none has told me that yet
               if (strcmp(aname, "\n") == 0)
                 memcpy(aname, "unknown", 8);
               else
                 aname[strlen(aname) - 1] = 0;
-              str nname = strreplace(aname, ';', '_');
+              str nname = strreplace(aname, '.', '_');
               // this is actually safe because in libdraw
-              // I check if if the author is NULL, if it is
+              // i check if if the author is NULL, if it is
               // then don't free it (avoids IOT instruction)
               ld_author(canvas, nname);
               str cuh1 = malloc(h * w + h + 1);
@@ -320,8 +280,6 @@ color number: ");
                   temp[j] = canvas->pixels[w * i + j] + 48;
                 memcpy(&cuh1[g], temp, w);
                 g += w;
-                if (i < h - 1)
-                  cuh1[g++] = '.';
               }
               cuh1[g] = 0;
               char fname[fnl];
@@ -334,10 +292,10 @@ color number: ");
                 lm_warn("file could not be opened - data will be printed");
                 // I'm sorry actually]
                 // 2/12/26 no i'm not
-                printf("CDC;%s;%s;%ld\n", cuh1, canvas->author, canvas->time);
+                printf("CDC2.%d.%s.%s.%ld\n", w, cuh1, canvas->author, canvas->time);
                 lm_sep();
               } else {
-                fprintf(file, "CDC;%s;%s;%ld", cuh1, canvas->author, canvas->time);
+                fprintf(file, "CDC2.%d.%s.%s.%ld", w, cuh1, canvas->author, canvas->time);
                 fclose(file);
               }
               ld_uncanvas(canvas);
@@ -347,7 +305,7 @@ color number: ");
             // fallback
             default: {
               lm_clear();
-              lm_error("no option made for selection %d", drawing->last_selection);
+              lm_error("no option made for selection %d", drawing->last);
               lm_sep();
               break;
             }
@@ -380,61 +338,94 @@ color number: ");
         */
         char buf[fl];
         fgets(buf, fl, file);
-        if (strcount(buf, ';') != 3) {
+        if (strcount(buf, '.') != 4) {
           lm_error("file is in the wrong format");
           fclose(file);
           lm_sep();
           break;
         }
-        str buftok = strtok(buf, ";");
+        str buftok = strtok(buf, ".");
         int i = 0;
-        str data[3];
+        //str data[3];
+        str fmt;
+        int w;
+        str cnv;
+        str atr;
         time_t time;
         while (buftok) {
-          if (i != 3) data[i] = buftok;
-          else time = atoi(buftok);
-          buftok = strtok(NULL, ";");
+          // CDC2.w.cnv.atr.time
+          switch (i) {
+            case 0: {
+              fmt = buftok;
+              break;
+            }
+            case 1: {
+              w = atoi(buftok);
+              break;
+            }
+            case 2: {
+              cnv = buftok;
+              break;
+            }
+            case 3: {
+              atr = buftok;
+              break;
+            }
+            case 4: {
+              time = atoi(buftok);
+              break;
+            }
+          }
+          buftok = strtok(NULL, ".");
           i++;
         }
-        if (strncmp(data[0], "CDC", 3) != 0) {
+        if (fmt[3] == ';') {
+          lm_warn(
+            "file is in an old format\x1b[0m\n\
+            i will NOT attempt to load it but make it look something like this:\n\
+            CDC2.width.canvas.author.time"
+          );
+          fclose(file);
+          lm_sep();
+          break;
+        }
+        if (strncmp(fmt, "CDC2", 4) != 0) {
           lm_error("file is in the wrong format");
           fclose(file);
           lm_sep();
           break;
         }
         str timefmt = ctime(&time);
-        printf("who: %s\nwhen: %s\n", data[2], timefmt);
-        for (int i = 0; data[1][i]; i++) {
-          char cur = data[1][i];
-          if (cur != '.')
-            printf(
-              "\x1b[%d;%dm%d%d",
-              (cur-'0')+30,
-              (cur-'0')+40,
-              (cur-'0'),
-              // funnier line
-              (cur-'0')
-            );
-          else
+        printf("who: %s\nwhen: %s\n", atr, timefmt);
+        for (int i = 0; cnv[i]; i++) {
+          char cur = cnv[i]-'0';
+          printf(
+            "\x1b[%d;%dm%d%d",
+            cur+30,
+            cur+40,
+            cur,
+            cur
+          );
+          if (i % w == w-1) // i am very smart.
             putchar(10);
         }
-        printf("\x1b[0m\n");
-        if (devmode) printf("%s;%s;%s;%lu\n", data[0], data[1], data[2], time);
+        printf("\x1b[0m");
+        if (devmode) printf("\n%s.%d.%s.%s.%lu\n", fmt, w, cnv, atr, time);
         fclose(file);
         lm_sep();
         break;
       }
       // info
       case 3: {
-        lm_clear();
-        printf("%s v. %s\nlicensed under MIT license\nmade with love and patience by greg\n", menu->name, menu->version);
+        lm_clear(); // funnier line)
+        printf("%s v. %s\nlicensed under MIT license\nmade with love and patience by Gregory Theodore Greg\n", menu->name, menu->version);
         lm_sep();
         break;
       }
       // fallback
       default: {
         lm_clear();
-        lm_error("no option made for selection %d", menu->last_selection);
+        lm_error("no option made for selection %d", menu->last);
         lm_sep();
         break;
       }

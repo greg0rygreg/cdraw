@@ -26,7 +26,7 @@ lm_menu *lm_domenu(
   ret->version = version;
   ret->options = options;
   ret->options_l = options_l;
-  ret->last_selection = 0;
+  ret->last = 0;
   ret->exit_t = exit_t;
   ret->submenu = submenu;
 
@@ -54,8 +54,14 @@ void lm_input(
   printf("\n[...] ");
 
   scanf("%d", &tmp);
-  menu->last_selection = tmp;
+  menu->last = tmp;
 }
+
+// TODO add settings
+// use structs to make an "lm_option" struct
+// and enums for option types (maybe)
+// 3/21/26 menu->options[op][ch] = (var? 'X':' '); lm_input(...);
+
 
 void lm_sep() {
   char b[76];

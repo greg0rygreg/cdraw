@@ -379,7 +379,7 @@ color number: ");
           buftok = strtok(NULL, ".");
           i++;
         }
-        if (fmt[3] == ';') {
+        /*if (fmt[3] != ';') {
           lm_warn(
             "file is in an old format\x1b[0m\n\
             i will NOT attempt to load it but make it look something like this:\n\
@@ -388,7 +388,7 @@ color number: ");
           fclose(file);
           lm_sep();
           break;
-        }
+        }*/
         if (strncmp(fmt, "CDC2", 4) != 0) {
           lm_error("file is in the wrong format");
           fclose(file);
